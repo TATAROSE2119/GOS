@@ -4,4 +4,12 @@ config TINY
 	bool "Enable Tiny mm"
 	default y
 
+config COW
+	bool "Enable COW"
+	default n
+
+config FORK
+	bool "Enable fork"
+	default n
+
 endmenu
