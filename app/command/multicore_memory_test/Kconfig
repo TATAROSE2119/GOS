@@ -1,0 +1,6 @@
+config CONSUMER_PRODUCER_TEST
+	bool "CONSUMER_PRODUCER_TEST"
+	default y
+config AXI_DMA_TEST
+	bool "AXI_DMA_TEST"
+	default y

@@ -1,0 +1,162 @@
+/*
+ * Copyright (c) 2024 Beijing Institute of Open Source Chip (BOSC)
+ *
+ * This program is free software; you can redistribute it and/or modify it
+ * under the terms and conditions of the GNU General Public License,
+ * version 2 or later, as published by the Free Software Foundation.
+ *
+ * This program is distributed in the hope it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ * more details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#ifndef _SBI_H
+#define _SBI_H
+
+#include <print.h>
+
+#define SBI_SET_TIMER 0
+#define SBI_CONSOLE_PUTCHAR 0x1
+#define SBI_CONSOLE_GETCHAR 0x2
+#define SBI_SET_MCOUNTEREN 0x3
+#define SBI_SET_MEDELEG 0x4
+#define SBI_GET_MEDELEG 0x5
+#define SBI_EXIT_VM_TEST 0x100
+#define SBI_GET_CPU_CYCLE 0x200
+#define SBI_GET_CPU_ID 0x201
+#define SBI_GET_CPU_MCOUNTEREN 0x202
+#define SBI_GET_CPU_MINSTRET 0x203
+#define SBI_HART_START 0x300
+#define SBI_SET_CSR_MIE 0x400
+#define SBI_GET_CSR_MIE 0x401
+#define SBI_GET_CSR_MENVCFG 0x402
+#define SBI_GET_SMSTATEEN 0x4c8
+#define SBI_SET_SMSTATEEN 0x4c9
+#define SBI_GET_M_MSI_DATA 0x500
+#define SBI_GET_M_MSI_ADDR 0x501
+#define SBI_GET_M_MSI_DATA_IPI 0x502
+#define SBI_GET_M_MSI_ADDR_IPI 0x503
+#define SBI_HPM_TEST 0x600
+#define SBI_PMP_INSERT_RANGE 0x601
+#define SBI_SET_STUB 0x700
+
+#define SBI_CALL(which, arg0, arg1, arg2) ({                    \
+        register unsigned long a0 asm ("a0") = (unsigned long)(arg0);   \
+        register unsigned long a1 asm ("a1") = (unsigned long)(arg1);   \
+        register unsigned long a2 asm ("a2") = (unsigned long)(arg2);   \
+        register unsigned long a7 asm ("a7") = (unsigned long)(which);  \
+        asm volatile ("ecall"                                   \
+                      : "+r" (a0)                               \
+                      : "r" (a1), "r" (a2), "r" (a7)            \
+                      : "memory");                              \
+        a0;                                                     \
+})
+
+#define SBI_CALL_0(which) SBI_CALL(which, 0, 0, 0)
+#define SBI_CALL_1(which, arg0) SBI_CALL(which, arg0, 0, 0)
+#define SBI_CALL_2(which, arg0, arg1) SBI_CALL(which, arg0, arg1, 0)
+#define SBI_CALL_3(which, arg0, arg1, arg2) SBI_CALL(which, arg0, arg1, arg2)
+
+static inline void sbi_set_timer(unsigned long stime_value)
+{
+	SBI_CALL_1(SBI_SET_TIMER, stime_value);
+}
+
+static inline void sbi_putchar(char c)
+{
+	SBI_CALL_1(SBI_CONSOLE_PUTCHAR, c);
+}
+
+static inline void sbi_put_string(char *str)
+{
+	int i;
+
+	for (i = 0; str[i] != '\0'; i++)
+		sbi_putchar((char)str[i]);
+}
+
+static inline unsigned long sbi_get_cpu_cycles()
+{
+	return SBI_CALL_0(SBI_GET_CPU_CYCLE);
+}
+
+static inline unsigned long sbi_get_cpu_instret()
+{
+	return SBI_CALL_0(SBI_GET_CPU_MINSTRET);
+}
+
+static inline int sbi_get_cpu_id()
+{
+	return SBI_CALL_0(SBI_GET_CPU_ID);
+}
+
+static inline long sbi_get_cpu_mcounteren()
+{
+	return SBI_CALL_0(SBI_GET_CPU_MCOUNTEREN);
+}
+
+static inline void sbi_set_mcounteren(unsigned long m_value)
+{
+	SBI_CALL_1(SBI_SET_MCOUNTEREN, m_value);
+}
+
+static inline int sbi_get_m_msi_data(int nr)
+{
+	return SBI_CALL_1(SBI_GET_M_MSI_DATA, nr);
+}
+
+static inline unsigned long sbi_get_m_msi_addr()
+{
+	return SBI_CALL_0(SBI_GET_M_MSI_ADDR);
+}
+
+static inline void sbi_set_csr_mie(unsigned long val)
+{
+	SBI_CALL_1(SBI_SET_CSR_MIE, val);
+}
+
+static inline unsigned long sbi_get_csr_mie()
+{
+	return SBI_CALL_0(SBI_GET_CSR_MIE);
+}
+
+static inline unsigned long sbi_get_csr_menvcfg()
+{
+	return SBI_CALL_0(SBI_GET_CSR_MENVCFG);
+}
+
+static inline void sbi_set_medeleg(unsigned long m_value)
+{
+	SBI_CALL_1(SBI_SET_MEDELEG, m_value);
+}
+
+static inline unsigned long sbi_get_medeleg(void)
+{
+	return SBI_CALL_0(SBI_GET_MEDELEG);
+}
+
+static inline void sbi_hpm_test()
+{
+	SBI_CALL_0(SBI_HPM_TEST);
+}
+
+static inline void sbi_set_remote_stub(unsigned long stub_info_pa)
+{
+	SBI_CALL_1(SBI_SET_STUB, stub_info_pa);
+}
+
+static inline void sbi_set_smstateen(unsigned long value)
+{
+	SBI_CALL_1(SBI_SET_SMSTATEEN, value);
+}
+
+static inline unsigned long sbi_get_smstateen()
+{
+	return SBI_CALL_0(SBI_GET_SMSTATEEN);
+}
+
+#endif

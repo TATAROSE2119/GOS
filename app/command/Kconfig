@@ -1,0 +1,166 @@
+config APP_CSR_CTL
+	bool "APP_CSR_CTL"
+config APP_DEVICES
+	bool "APP_DEVICES"
+config APP_DEVMEM
+	bool "APP_DEVMEM"
+config APP_DMA_TEST
+	bool "APP_DMA_TEST"
+config APP_HELLO
+	bool "APP_HELLO"
+config APP_MOUNT
+	bool "APP_MOUNT"
+config APP_HISTORY
+	bool "APP_HISTORY"
+config APP_IMSIC_TEST
+	bool "APP_IMSIC_TEST"
+	depends on SELECT_AIA
+	depends on AIA
+config APP_VS_IMSIC_MULTI_TEST
+	bool "APP_VS_IMSIC_MULTI_TEST"
+	depends on VIRT
+	depends on SELECT_AIA
+	depends on AIA
+config APP_LS
+	bool "APP_LS"
+config APP_CHROOT
+	bool "APP_CHROOT"
+	depends on ENABLE_FS
+config APP_MEM_READ
+	bool "APP_MEM_READ"
+config APP_PAGE_TLB_TEST
+	bool "APP_PAGE_TLB_TEST"
+	depends on ENABLE_MMU
+config APP_PLIC_SET_AFFINITY
+	bool "APP_PLIC_SET_AFFINITY"
+config APP_SET_DEVICE_IRQ_AFFINITY
+	bool "APP_SET_DEVICE_IRQ_AFFINITY"
+	default y
+config APP_SPINLOCK_TEST
+	bool "APP_SPINLOCK_TEST"
+config APP_TASK_INFO
+	bool "APP_TASK_INFO"
+config APP_USER_RUN
+	bool "APP_USER_RUN"
+	depends on USER
+config APP_USER_RUN_EXT
+	bool "APP_USER_RUN_EXT"
+	depends on USER
+config APP_USER_INFO
+	bool "APP_USER_INFO"
+	depends on USER
+config APP_VCPU_RUN
+	bool "APP_VCPU_RUN"
+	depends on VIRT
+config APP_VCPU_RUN_EXT
+	bool "APP_VCPU_RUN_EXT"
+	depends on VIRT
+config APP_VCPU_INFO
+	bool "VCPU_INFO"
+	depends on VIRT
+config APP_STREAM
+	bool "APP_STREAM"
+config APP_HUGE_PAGE_TEST
+	bool "APP_HUGE_PAGE_TEST"
+config APP_TINY_TEST
+	bool "APP_TINY_TEST"
+	depends on TINY
+config APP_PLANE
+	bool "A Plane Game"
+	default n
+config APP_GET_PTE_TEST
+	bool "Get Pte Test"
+	default n
+config APP_SVNAPOT_TEST
+	bool "APP_SVNAPOT_TEST"
+	depends on SVNAPOT
+	default n
+config MULTICORE_TEST
+	bool "Multicore_test"
+config APP_FLOAT_TEST
+	bool "APP_FLOAT_TEST"
+config APP_MEM_WALK
+	bool "APP_MEM_WALK"
+config APP_STVAL
+	bool "APP_STVAL"
+config APP_CMD_LOADER
+	bool "APP_CMD_LOADER"
+	default y
+config APP_MEM_TESTER
+	bool "APP_MEM_TESTER"
+config APP_G_STAGE_TEST
+	bool "APP_G_STAGE_TEST"
+	depends on VIRT
+	default y
+config APP_SVPBMT_TEST
+	bool "APP_SVPBMT_TEST"
+	depends on ENABLE_SVPBMT
+	default y
+config APP_SCAN_MEM_TEST
+	bool "APP_SCAN_MEM_TEST"
+	default y
+config APP_RESV_MEM_INFO
+	bool "APP_RESV_MEM_INFO"
+	default y
+config APP_CACHE_FLUSH_TEST
+	bool "APP_CACHE_FLUSH_TEST"
+	depends on ENABLE_ZICBOM 
+	default y
+config APP_SINVAL_TEST
+	bool "APP_SINVAL_TEST"
+	default y
+config APP_ZICOND_TEST
+	bool "APP_ZICOND_TEST"
+	default y
+config APP_HPM_TEST
+	bool "APP_HPM_TEST"
+	default y
+config APP_LSPCI
+	bool "APP_LSPCI"
+	depends on PCI
+	default y
+config APP_SLEEP
+	bool "APP_SLEEP"
+	default y
+config APP_LSDMAC
+	bool "APP_LSDMAC"
+	default y
+config APP_STUB_TEST
+	bool "APP_STUB_TEST"
+	default y
+config APP_INTR_TEST
+	bool "APP_INTR_TEST"
+	default n
+config APP_IPI_TEST
+	bool "APP_IPI_TEST"
+	default y
+config APP_DOOM
+	bool "DOOM"
+	default n
+config APP_SMSTATEEN_TEST
+	bool "APP_SMSATEEN_TEST"
+	default y
+config APP_MEM_RANG_TEST
+	bool "APP_MEM_RANG_TEST"
+	depends on !ENABLE_MMU
+	default y
+
+menuconfig MULTICORE_MEMORY_TEST
+	bool "MULTI_CORE_MEMORY_TEST"
+	default y
+	if MULTICORE_MEMORY_TEST
+		source "app/command/multicore_memory_test/Kconfig"
+	endif
+
+if !ENABLE_MULTI_TASK
+config APP_WFI_TEST
+	bool "APP_WFI_TEST"
+	default y
+endif
+
+if !ENABLE_MMU && !IOMMU
+config APP_IOMMU_LIB_TEST
+	bool "APP_IOMMU_LIB_TEST"
+	default n
+
+endif

@@ -1,0 +1,47 @@
+-include include/config/auto.conf
+
+src := $(obj)
+
+kbuild-dir := $(if $(filter /%,$(src)),$(src),$(TOPDIR)/$(src))
+
+PHONY := __build
+__build:
+
+obj-y :=
+subdir-y :=
+
+include $(kbuild-dir)/Makefile
+
+__subdir-y := $(patsubst %/, %, $(filter %/, $(obj-y)))
+subdir-y += $(strip $(__subdir-y))
+subdir-y := $(addprefix $(obj)/,$(subdir-y))
+
+subdir_objs := $(foreach f, $(subdir-y), $(f)/built-in.o)
+
+static_libs := $(filter-out %/, $(lib-y))
+static_libs := $(addprefix $(obj)/,$(static_libs))
+
+cur_objs := $(filter-out %/, $(obj-y))
+cur_objs := $(addprefix $(obj)/,$(cur_objs))
+
+
+PHONY += $(subdir-y)
+
+__build: $(subdir-y) $(obj)/built-in.o
+
+$(subdir-y):
+	@make -f $(TOPDIR)/Makefile.build obj=$@
+
+$(obj)/built-in.o: $(cur_objs) $(subdir_objs)
+	@echo "LD $@"
+	@$(LD) -r -o $@ $^ -L. $(static_libs)
+
+%.o: %.c
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(TOPDIR)/include/ -I$(TOPDIR)/include/gos -I$(GOS_CORE_DIR)/include -I$(TOPDIR)/include/generic $(DEBUG) -c $< -o $@
+
+%_s.o: %.S
+	@echo "CC $@"
+	@$(CC) $(COPS) -I$(TOPDIR)/include/ -I$(TOPDIR)/include/gos $(DEBUG) -c $< -o $@
+
+.PHONY: $(PHONY)

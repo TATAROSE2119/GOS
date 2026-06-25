@@ -1,0 +1,82 @@
+# =============================================================
+#  Gos .gitignore  (Kbuild-based RISC-V project)
+#  目标：只跟踪源码/配置/文档，排除编译产物、生成文件、缓存、
+#        以及大体积的第三方预编译工具。
+# =============================================================
+
+# --- Kbuild 输出目录 ---
+/out/
+/build/
+
+# --- Kbuild 生成的配置与头文件 ---
+/.config
+/.config.old
+/.config.*
+/include/config/
+/include/gos-auto/
+/include/generated/
+
+# --- 编译目标文件 / 静态库 / 中间产物 ---
+*.o
+*.o.*
+*.a
+*.so
+*.ko
+*.lo
+*.obj
+built-in.o
+
+# --- Kbuild 命令/依赖文件 ---
+.*.cmd
+*.cmd
+.tmp_*
+modules.order
+Module.symvers
+
+# --- 链接与构建产物 ---
+*.elf
+*.map
+*.lst
+*.tmp
+*.i
+
+# --- 编译后的设备树（保留 .dts/.dtsi 源文件）---
+*.dtb
+*.dtbo
+
+# --- 生成的镜像（大文件，可由构建/打包脚本重建）---
+/init.img
+/Image.bin
+/gos.bin
+
+# --- 编辑器 / 语言服务器 / 工具缓存 ---
+/.cache/
+.clangd/
+compile_commands.json
+/.vscode/
+/.idea/
+*.swp
+*.swo
+*~
+tags
+cscope.*
+
+# =============================================================
+#  第三方预编译大二进制（约 150MB+，不建议入库）
+#  如确需随仓库分发，删掉下面对应行，再 `git add -f <file>`。
+#  注意 GitHub 单文件硬上限 100MB。
+# =============================================================
+/qemu-system-riscv64
+/qemu-system-riscv64-aia
+/qemu-system-riscv64-debug
+/riscv64-nemu-interpreter
+/bin2fpgadata
+
+# =============================================================
+#  说明：以下文件是“源/资产”，已**特意保留**跟踪，不要忽略：
+#   - configs/*_defconfig      （配置的真正来源，.config 由它生成）
+#   - *.dts / *.dtsi           （设备树源）
+#   - auto_run.bin             （自动执行命令的配置）
+#   - entry/logo.bin, app/command/plane/*.bin, app/command/doom/*.wad
+#                              （测试程序用到的图像/数据资产）
+# =============================================================
