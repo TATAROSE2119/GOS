@@ -43,11 +43,14 @@ Module.symvers
 # --- 编译后的设备树（保留 .dts/.dtsi 源文件）---
 *.dtb
 *.dtbo
+# 但 input.dtb 是预编译的启动必需文件，不能被忽略
+!/input.dtb
 
-# --- 生成的镜像（大文件，可由构建/打包脚本重建）---
-/init.img
-/Image.bin
-/gos.bin
+# --- 预编译工具与启动镜像（由 gos-master 提供，构建/运行必需）---
+!/qemu-system-riscv64
+!/bin2fpgadata
+!/auto_run.bin
+!/init.img
 
 # --- 编辑器 / 语言服务器 / 工具缓存 ---
 /.cache/
@@ -66,7 +69,7 @@ cscope.*
 #  如确需随仓库分发，删掉下面对应行，再 `git add -f <file>`。
 #  注意 GitHub 单文件硬上限 100MB。
 # =============================================================
-/qemu-system-riscv64
+# /qemu-system-riscv64
 /qemu-system-riscv64-aia
 /qemu-system-riscv64-debug
 /riscv64-nemu-interpreter

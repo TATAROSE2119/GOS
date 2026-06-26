@@ -29,7 +29,7 @@ pgprot_t pgprot_no_user =
                      _PAGE_DIRTY);
 
 char *str[]={"----> _PAGE_USER is enalbe", "----> _PAGE_USER is disable \n"};
-static int set_pte(pgprot_t pgprot, char *c)
+static int test_set_pte(pgprot_t pgprot, char *c)
 {
 	void *va;
 
@@ -56,10 +56,10 @@ static int user_cmd_pte_handler(int argc, char *argv[], void *priv)
 	for (int i = 0; i < argc; i++)
 		print("cmd%d: %s\n", i, argv[i]);
 
-	ret = set_pte(pgprot, str[0]);
+	ret = test_set_pte(pgprot, str[0]);
 	if (ret == -1)
 		return -1;
-	ret = set_pte(pgprot_no_user, str[1]);
+	ret = test_set_pte(pgprot_no_user, str[1]);
 	if (ret == -1)
 		return -1;
 

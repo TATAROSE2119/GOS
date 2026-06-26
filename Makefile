@@ -99,7 +99,7 @@ obj-$(CONFIG_USER) += user/
 
 GOS_DIR = gos
 GOS_C_FILES = $(wildcard $(GOS_DIR)/*.c)
-GOS_ASM_FILES = $(wildcard $(GOS_DIR)/*.S)
+GOS_ASM_FILES = $(filter-out $(GOS_DIR)/tmp_kallsyms.S, $(wildcard $(GOS_DIR)/*.S))
 GOS_OBJ_FILES = $(GOS_C_FILES:$(GOS_DIR)/%.c=$(GOS_DIR)/%_c.o)
 GOS_OBJ_FILES += $(GOS_ASM_FILES:$(GOS_DIR)/%.S=$(GOS_DIR)/%_s.o)
 

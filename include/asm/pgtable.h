@@ -17,7 +17,6 @@
 #ifndef PGTABLE_H
 #define PGTABLE_H
 
-#include "asm/tlbflush.h"
 #include <limits.h>
 extern int pgtable_l5_enabled;
 extern int pgtable_l4_enabled;
@@ -200,9 +199,10 @@ static inline unsigned long pte_uncow_mkwrite(unsigned long pte)
 	return (pte & ~_PAGE_COW) | _PAGE_WRITE | _PAGE_DIRTY;
 }
 
-static inline void set_pte(unsigned long *ptep, unsigned long pte)
+static inline int set_pte(unsigned long *ptep, unsigned long pte)
 {
 	*ptep = pte;
+	return 0;
 }
 
 static inline int pmd_present(unsigned long pmd)

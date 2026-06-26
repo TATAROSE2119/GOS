@@ -14,6 +14,7 @@
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "gos.h"
 #include <asm/type.h>
 #include <uart.h>
 #include <device.h>
@@ -27,7 +28,6 @@
 #include <percpu.h>
 #include <task.h>
 #include <devicetree.h>
-#include "gos.h"
 #include "../app/shell.h"
 #include "asm/sbi.h"
 #include "virt.h"
@@ -39,8 +39,8 @@
 
 extern const char logo[];
 
-void start_gos(unsigned int hart_id,
-	       struct device_init_entry *hw, char *boot_option)
+void start_gos(unsigned int hart_id, struct device_init_entry *hw,
+	       char *boot_option)
 {
 	unsigned long start, end;
 
@@ -71,7 +71,15 @@ void start_gos(unsigned int hart_id,
 #ifdef CONFIG_ENABLE_MMU
 	paging_init(hw);
 #endif
+
+
+
 	early_print_setup(hw);
+
+#if CONFIG_COW
+	page_refcount_init();
+#endif 
+
 
 	print("satp:0x%lx\n", read_csr(satp));
 
