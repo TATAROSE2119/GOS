@@ -20,13 +20,12 @@
 #include <device.h>
 #include <asm/pgtable.h>
 
-
 #define GFP_NOCACHE (1UL << 0)
-#define GFP_IO      (1UL << 1)
+#define GFP_IO (1UL << 1)
 
-#define MAX_BYTE_PER_MAPS (2*1024*1024*1024UL)
+#define MAX_BYTE_PER_MAPS (2 * 1024 * 1024 * 1024UL)
 struct mem_maps {
-	unsigned long maps[8192];	//2G
+	unsigned long maps[8192]; // 2G
 	unsigned map_nr;
 };
 
@@ -43,27 +42,27 @@ struct memory_block {
 	int reserved_cnt;
 };
 
-#define for_each_memory_block(entry, blocks, n)      \
+#define for_each_memory_block(entry, blocks, n)                                \
 	for (entry = (struct memory_block *)blocks; n > 0; entry++, n--)
 
 int paging_init(struct device_init_entry *hw);
 void enable_mmu(int on);
-int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size,
-		        pgprot_t pgprot);
-int mmu_page_mapping_1G(unsigned long phy, unsigned long virt, unsigned int size,
-		        pgprot_t pgprot);
-int mmu_page_mapping_8k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot);
-int mmu_page_mapping_16k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot);
-int mmu_page_mapping_32k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot);
-int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot);
+int mmu_page_mapping_2M(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot);
+int mmu_page_mapping_1G(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot);
+int mmu_page_mapping_8k(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot);
+int mmu_page_mapping_16k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot);
+int mmu_page_mapping_32k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot);
+int mmu_page_mapping_64k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot);
 int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 		     pgprot_t pgprot);
-int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
-			       pgprot_t pgprot);
+int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt,
+			       unsigned int size, pgprot_t pgprot);
 int mmu_user_page_mapping(unsigned long *pgdp, unsigned long phy,
 			  unsigned long virt, unsigned int size,
 			  pgprot_t pgprot);
@@ -98,13 +97,32 @@ unsigned long *mmu_get_pte(unsigned long virt_addr);
 unsigned long get_default_pgd(void);
 unsigned long get_current_pgd(void);
 void walk_unused_mem_and_print(void);
-void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data);
+void unused_mem_walk(void (*fn)(unsigned long addr, unsigned int nr,
+				void *data),
+		     void *data);
 int mem_range_is_free(unsigned long addr, unsigned int size);
-void reserved_mem_walk(void (*fn)(unsigned long addr, unsigned int nr, void *data), void *data);
+void reserved_mem_walk(void (*fn)(unsigned long addr, unsigned int nr,
+				  void *data),
+		       void *data);
 
 static inline void dump_fault_addr_pt(unsigned long addr)
 {
 	return mmu_walk_and_print_pte(addr);
 }
+
+#if CONFIG_COW
+/*
+ * 物理页引用计数（COW 地基）。
+ * refcount 原始值：0 = 单一拥有者（普通分配页默认）；>=2 = 共享人数。
+ */
+struct page {
+	unsigned short refcount; /* 本期仅此字段，留扩展口 */
+};
+
+void page_refcount_init(void);
+void get_page(unsigned long pa);
+int put_page(unsigned long pa);
+int page_count(unsigned long pa);
+#endif
 
 #endif
