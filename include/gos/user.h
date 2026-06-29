@@ -18,6 +18,7 @@
 #define __USER_H
 
 #include "list.h"
+#include "mm.h"
 #include "spinlocks.h"
 #include "asm/pgtable.h"
 #include "gos.h"
@@ -204,5 +205,9 @@ void user_init(void);
 void dump_user_info_on_all_cpu(void);
 void dump_user_info_on_cpu(int cpu);
 struct user *get_user(int userid, int cpu);
+void set_current_user(struct user *user);
+struct user *get_current_user(void);
+
+int do_fork(struct user *parent);
 
 #endif

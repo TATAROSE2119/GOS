@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-GNU = /home/tatarose_laptop_wsl/riscv/bin/riscv64-unknown-linux-gnu-
+GNU = /home/tatarose/riscv/bin/riscv64-unknown-linux-gnu-
 
 TOPDIR := $(shell pwd)
 

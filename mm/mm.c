@@ -430,7 +430,21 @@ static struct page *page_map;  // 引用计数的大表，虚拟地址的指针
 static unsigned long pfn_base; // 最低物理页号
 static unsigned long pfn_nr;   // 表里一共多少页
 
-// 地址->表项小工具
+/**
+ * pa_2_page - 物理地址 -> struct page 元数据指针
+ * @pa: 物理地址（Physical Address）
+ *
+ * 将物理地址转换为对应 struct page 的指针。内部做 PFN 偏移计算及
+ * 越界检查：若 page_map 未初始化、pfn 低于 pfn_base 或超出范围，
+ * 返回 NULL。
+ *
+ * 返回值: 指向对应物理页元数据的指针，失败返回 NULL
+ * 调用上下文: 任意上下文（纯计算，无锁无阻塞）
+ *
+ * 用法:
+ *   struct page *p = pa_2_page(0x80000000);
+ *   if (p) { p->refcount++; }
+ */
 static struct page *pa_2_page(unsigned long pa)
 {
 	unsigned long pfn = pa >> PAGE_SHIFT;
@@ -439,7 +453,21 @@ static struct page *pa_2_page(unsigned long pa)
 	}
 	return &page_map[pfn - pfn_base];
 }
-// 建表函数
+
+/**
+ * page_refcount_init - 初始化物理页引用计数子系统
+ *
+ * 根据系统可用物理内存范围（get_phy_start() ~ get_phy_end()），
+ * 通过 __mm_alloc() 分配一块连续物理内存作为 page_map 数组，
+ * 用于存储所有物理页的 struct page 元数据（当前仅 refcount 字段）。
+ * 分配后 memset 清零。
+ *
+ * 调用上下文: 内核初始化阶段，mm_init() 之后，开 MMU 之前或之后均可
+ *
+ * 用法:
+ *   // 在 main() 初始化序列中调用一次
+ *   page_refcount_init();
+ */
 void page_refcount_init(void)
 {
 	unsigned long phy_start = get_phy_start();
@@ -460,7 +488,42 @@ void page_refcount_init(void)
 	      phy_start, phy_end, bytes / 1024);
 }
 
-// 三个原语
+// ============================================================
+// 引用计数三原语：get_page / page_count / put_page
+//
+// refcount 语义:
+//   0  ->  页面未激活 或 已完全释放（可回收至 bitmap）
+//   1  ->  （保留，实际不使用）
+//   2  ->  基引用（页面存活）+ 0 个外部引用（首次 get_page 后）
+//   N  ->  基引用 + (N-2) 个外部引用
+//
+// 生命周期:
+//   __mm_alloc()        -> refcount = 0（memset 后的初始态）
+//   get_page()          -> refcount = 2（激活 + 首次持有）
+//   get_page() 再调用   -> refcount++
+//   put_page()          -> refcount--
+//   ... 反复 ...
+//   put_page() 到 0     -> 调用者负责归还内存到 __mm_free()
+// ============================================================
+
+/**
+ * get_page - 增加物理页的引用计数
+ * @pa: 物理地址
+ *
+ * 对该物理页增加一次引用。若该页 refcount 为 0（刚分配未激活），
+ * 则直接置为 2（基引用 + 当前引用）；否则递增。
+ *
+ * 调用上下文: 任意进程上下文，内部持 mem_lock 自旋锁
+ * 副作用:    修改 page_map 中对应页的 refcount
+ *
+ * 用法:
+ *   // 首次引用刚分配的页
+ *   void *addr = __mm_alloc(PAGE_SIZE);
+ *   get_page(virt_to_phy(addr));   // refcount: 0 -> 2
+ *
+ *   // fork 时共享父进程页面
+ *   get_page(parent_pa);            // refcount: 2 -> 3
+ */
 void get_page(unsigned long pa)
 {
 	struct page *p;
@@ -478,6 +541,26 @@ void get_page(unsigned long pa)
 
 	spin_unlock_irqrestore(&mem_lock, flags);
 }
+
+/**
+ * page_count - 查询物理页的当前引用计数
+ * @pa: 物理地址
+ *
+ * 返回该物理页的 refcount 值。若 pa 不在可用范围或 refcount==0，
+ * 返回 1（保守值，防止误判为可释放）。
+ *
+ * 返回值: 引用计数值（>= 1）
+ * 调用上下文: 任意上下文，内部持 mem_lock 自旋锁
+ *
+ * 用法:
+ *   if (page_count(pa) == 2) {
+ *       // 仅当前进程在使用，可直接写（无需 COW 复制）
+ *       do_direct_write(pa);
+ *   } else {
+ *       // 多个进程共享，需要 COW 复制新页
+ *       do_cow_copy(pa);
+ *   }
+ */
 int page_count(unsigned long pa)
 {
 	struct page *p;
@@ -491,6 +574,20 @@ int page_count(unsigned long pa)
 	return n;
 }
 
+/**
+ * __put_page_locked - 减少引用计数（内部版本，调用者已持锁）
+ * @pa: 物理地址
+ *
+ * 对物理页减少一次引用。根据 refcount 状态：
+ *   refcount <= 1  ->  清零，返回 1（页面可回收）
+ *   refcount == 2  ->  清零，返回 0（基引用释放，但无外部引用残留）
+ *   refcount >  2  ->  递减，返回 0（尚有其他引用者）
+ *
+ * 返回值: 1 = 页面可回收，0 = 仍有引用或不需要回收
+ *
+ * 注意: 调用者必须已持有 mem_lock。返回 1 时调用者负责
+ *       将页面归还给 __mm_free()。
+ */
 static int __put_page_locked(unsigned long pa)
 {
 	struct page *p = pa_2_page(pa);
@@ -510,6 +607,21 @@ static int __put_page_locked(unsigned long pa)
 	return 0;
 }
 
+/**
+ * put_page - 减少物理页的引用计数（外部接口）
+ * @pa: 物理地址
+ *
+ * 对物理页减少一次引用。内部获取 mem_lock 后调用 __put_page_locked()。
+ *
+ * 返回值: 1 = 页面可回收，0 = 仍有引用
+ * 调用上下文: 任意进程上下文，内部持 mem_lock 自旋锁
+ *
+ * 用法:
+ *   if (put_page(pa)) {
+ *       // refcount 归零，可以释放物理页
+ *       __mm_free(phy_to_virt(pa), PAGE_SIZE);
+ *   }
+ */
 int put_page(unsigned long pa)
 {
 	int ret;

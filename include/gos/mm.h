@@ -17,6 +17,7 @@
 #ifndef _MM_H
 #define _MM_H
 
+#include "../gos-auto/autoconf.h"	/* 确保 CONFIG_COW 等宏不依赖包含顺序 */
 #include <device.h>
 #include <asm/pgtable.h>
 
@@ -123,6 +124,8 @@ void page_refcount_init(void);
 void get_page(unsigned long pa);
 int put_page(unsigned long pa);
 int page_count(unsigned long pa);
+int copy_page_range(unsigned long start, unsigned long end,
+		    unsigned long *dst_pgdp, unsigned long *src_pgdp);
 #endif
 
 #endif

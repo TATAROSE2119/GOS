@@ -98,7 +98,7 @@ fi
 
 bear -- make clean
 bear -- make autoconf
-bear -- make -j$(nproc)
+bear -- make 
 
 if [ "$1" = "fpga" ];then
 	bear -- make fpga

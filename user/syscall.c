@@ -60,18 +60,29 @@ unsigned long sys_unmap(void *addr, unsigned int size)
 	return 0;
 }
 
-static const int sys_ni_syscall(void)
+#if CONFIG_FORK
+unsigned long sys_fork(void)
 {
-	return -1;
+	struct user *parent=get_current_user();
+	if(!parent){
+		return -1;
+	}
+
+	return do_fork(parent); 
 }
+#endif
+
+static const int sys_ni_syscall(void) { return -1; }
 
 #undef __SYSCALL
-#define __SYSCALL(nr, call)     [nr] = (call),
+#define __SYSCALL(nr, call) [nr] = (call),
 
 const void *syscall_table[__NR_syscalls] = {
-	[0 ... __NR_syscalls - 1] = sys_ni_syscall,
-	__SYSCALL(__NR_print, sys_print)
-	    __SYSCALL(__NR_mmap, sys_mmap)
-	    __SYSCALL(__NR_mmap_pg, sys_mmap_pg)
-	    __SYSCALL(__NR_unmap, sys_unmap)
+    [0 ... __NR_syscalls - 1] = sys_ni_syscall,
+    __SYSCALL(__NR_print, sys_print) __SYSCALL(__NR_mmap, sys_mmap)
+	__SYSCALL(__NR_mmap_pg, sys_mmap_pg) __SYSCALL(__NR_unmap, sys_unmap)
+#if CONFIG_FORK
+	__SYSCALL(__NR_fork,sys_fork)
+#endif
+
 };

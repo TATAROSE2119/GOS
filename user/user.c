@@ -39,12 +39,12 @@
 extern void do_exception_vector(void);
 extern char user_bin[];
 static DEFINE_PER_CPU(struct list_head, user_list);
+
+static DEFINE_PER_CPU(struct user *, current_user);
+
 static unsigned long userid_bitmap;
 
-static void user_userid_init(void)
-{
-	userid_bitmap = 0;
-}
+static void user_userid_init(void) { userid_bitmap = 0; }
 
 static void user_update_run_params(struct user *user)
 {
@@ -71,7 +71,8 @@ static int user_set_run_params(struct user *user, struct user_run_params *cmd)
 {
 	struct user_run_params *params = &user->s_run_params;
 
-	while (params->busy == 1) ;
+	while (params->busy == 1)
+		;
 
 	__smp_rmb();
 
@@ -159,8 +160,10 @@ static void __dump_user_info(int cpu)
 	}
 
 	print("+++++++++++++ user info on cpu%d +++++++++++++\n", cpu);
-	list_for_each_entry(user, users, list) {
-		print("@@@@@@@@@@@@@@ user%d info: @@@@@@@@@@@@@@\n", user->user_id);
+	list_for_each_entry(user, users, list)
+	{
+		print("@@@@@@@@@@@@@@ user%d info: @@@@@@@@@@@@@@\n",
+		      user->user_id);
 		print("- userid : %d\n", user->user_id);
 		print("- pgdp : 0x%lx\n", user->pgdp);
 		print("- memory info:\n");
@@ -168,7 +171,8 @@ static void __dump_user_info(int cpu)
 		print("    code_user_va : 0x%lx\n", user->user_code_user_va);
 		print("    code_pa : 0x%lx\n", user->user_code_pa);
 		print("    share_mem_va : 0x%lx\n", user->user_share_memory_va);
-		print("    share_mem_user_va : 0x%lx\n", user->user_share_memory_user_va);
+		print("    share_mem_user_va : 0x%lx\n",
+		      user->user_share_memory_user_va);
 		print("    share_mem_pa : 0x%lx\n", user->user_share_memory_pa);
 		print("\n");
 	}
@@ -181,7 +185,8 @@ struct user *get_user(int userid, int cpu)
 
 	users = &per_cpu(user_list, cpu);
 
-	list_for_each_entry(user, users, list) {
+	list_for_each_entry(user, users, list)
+	{
 		if (user->user_id == userid)
 			return user;
 	}
@@ -189,23 +194,26 @@ struct user *get_user(int userid, int cpu)
 	return NULL;
 }
 
+void set_current_user(struct user *user)
+{
+	per_cpu(current_user, sbi_get_cpu_id()) = user;
+}
+
+struct user *get_current_user(void)
+{
+	return per_cpu(current_user, sbi_get_cpu_id());
+}
+
 void dump_user_info_on_all_cpu(void)
 {
 	int cpu;
 
-	for_each_online_cpu(cpu)
-		__dump_user_info(cpu);
+	for_each_online_cpu(cpu) __dump_user_info(cpu);
 }
 
-void dump_user_info_on_cpu(int cpu)
-{
-	__dump_user_info(cpu);
-}
+void dump_user_info_on_cpu(int cpu) { __dump_user_info(cpu); }
 
-struct user *user_create_force(void)
-{
-	return __user_create();
-}
+struct user *user_create_force(void) { return __user_create(); }
 
 struct user *user_create(void)
 {
@@ -257,15 +265,14 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	}
 	user->user_code_pa = virt_to_phy(user->user_code_va);
 
-	print
-	    ("user space user mode page mapping -- va: 0x%lx --> pa: 0x%lx, size:0x%x\n",
-	     user->user_code_user_va, user->user_code_pa, user_bin_size);
+	print("user space user mode page mapping -- va: 0x%lx --> pa: 0x%lx, "
+	      "size:0x%x\n",
+	      user->user_code_user_va, user->user_code_pa, user_bin_size);
 	user_page_mapping(user->user_code_pa, user->user_code_user_va,
 			  user_bin_size);
 
-	if (-1 ==
-	    add_user_space_memory(user, user->user_code_user_va,
-				  user_bin_size)) {
+	if (-1 == add_user_space_memory(user, user->user_code_user_va,
+					user_bin_size)) {
 		print("user space memory overlay!! start:0x%lx, len: 0x%x\n",
 		      user->user_code_user_va, user_bin_size);
 		return -1;
@@ -287,9 +294,8 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 
 	local_flush_tlb_all();
 
-	if (-1 ==
-	    add_user_space_memory(user, user->user_share_memory_user_va,
-				  USER_SPACE_SHARE_MEMORY_SIZE)) {
+	if (-1 == add_user_space_memory(user, user->user_share_memory_user_va,
+					USER_SPACE_SHARE_MEMORY_SIZE)) {
 		print("user space memory overlay!! start:0x%lx, len: 0x%x\n",
 		      user->user_share_memory_user_va,
 		      USER_SPACE_SHARE_MEMORY_SIZE);
@@ -318,13 +324,16 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 		print("user space alloc pt_regs failed !\n");
 		return -1;
 	}
-        memset((char *)regs, 0, sizeof(struct pt_regs));
+	memset((char *)regs, 0, sizeof(struct pt_regs));
 
 #ifndef CONFIG_ENABLE_MULTI_TASK
 	user->pgdp = (void *)phy_to_virt(get_default_pgd());
 #else
 	user->pgdp = get_current_task()->pgdp;
 #endif
+
+	set_current_user(user);
+
 	while (1) {
 		user_update_run_params(user);
 		disable_local_irq();
@@ -341,12 +350,98 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	return 0;
 }
 
+#if CONFIG_FORK
+// 子任务入口
+static int user_child_start(void *data)
+{
+	struct user *child = (struct user *)data;
+	struct pt_regs *regs;
+
+	regs = mm_alloc(sizeof(struct pt_regs));
+	if (!regs) {
+		return -1;
+	}
+	memset((char *)regs, 0, sizeof(struct pt_regs));
+
+	child->pgdp = get_current_task()->pgdp;
+
+	set_current_user(child);
+
+	while (1) {
+		disable_local_irq();
+
+		user_mode_switch_to(&child->cpu_context);
+		if (do_user_exception(child, regs) == -1) {
+			enable_local_irq();
+			break;
+		}
+
+		enable_local_irq();
+	}
+	mm_free((void *)regs, sizeof(struct pt_regs));
+	return 0;
+}
+int do_fork(struct user *parent)
+{
+	struct user *child;
+	struct user_memory_region *region;
+	void *child_pgdp;
+	void *default_pgd = (void *)phy_to_virt(get_default_pgd());
+
+	child = user_create_force();
+	if (!child) {
+		return -1;
+	}
+	user_update_userid(child);
+
+	child_pgdp = mm_alloc(PAGE_SIZE);
+	if (!child_pgdp) {
+		return -1;
+	}
+	memcpy((char *)child_pgdp, (char *)default_pgd, PAGE_SIZE);
+
+	list_for_each_entry(region, &parent->memory_region, list)
+	{
+		if (copy_page_range(region->start, region->end,
+				    (unsigned long *)child_pgdp,
+				    (unsigned long *)phy_to_virt(
+					(unsigned long)parent->pgdp))) {
+			return -1;
+		}
+		add_user_space_memory(child, region->start,
+				      region->end - region->start);
+	}
+	// clone U态上下文加元数据
+	child->cpu_context = parent->cpu_context; // 整包寄存器/CSR
+	child->cpu_context.u_context.a0 = 0;	  // child fork() return 0;
+	child->cpu_context.u_context.sepc = parent->cpu_context.u_context.sepc +
+					    4; // 跳过ecall，从下一条指令继续
+
+	child->user_code_user_va = parent->user_code_user_va;
+	child->user_code_pa = parent->user_code_pa;
+	child->user_code_va = parent->user_code_va;
+	child->user_share_memory_user_va = parent->user_share_memory_user_va;
+	child->user_share_memory_pa = parent->user_share_memory_pa;
+	child->user_share_memory_va = parent->user_share_memory_va;
+	child->mapping = 1; // 标记为已经映射
+
+	if (create_task("user_child", user_child_start, (void *)child,
+			sbi_get_cpu_id(), 0, 0,
+			(void *)virt_to_phy((unsigned long)child_pgdp)) < 0) {
+		return -1;
+	}
+	return child->user_id;
+}
+
+#endif
+
 void user_init(void)
 {
 	int cpu;
 	struct list_head *users;
 
-	for_each_online_cpu(cpu) {
+	for_each_online_cpu(cpu)
+	{
 		users = &per_cpu(user_list, cpu);
 		INIT_LIST_HEAD(users);
 	}

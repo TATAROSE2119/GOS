@@ -38,6 +38,7 @@ extern unsigned long percpu_offset[MAX_CPU_COUNT];
 
 #define per_cpu_ptr(ptr, cpu) SHIFT_PERCPU_PTR((ptr), per_cpu_offset((cpu)))
 
+
 #define per_cpu(var, cpu) (*per_cpu_ptr(&(var), cpu))
 
 int percpu_init(void);

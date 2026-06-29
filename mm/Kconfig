@@ -6,10 +6,10 @@ config TINY
 
 config COW
 	bool "Enable COW"
-	default n
+	default y
 
 config FORK
 	bool "Enable fork"
-	default n
+	default y
 
 endmenu
