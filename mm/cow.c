@@ -89,4 +89,13 @@ static int copy_level(unsigned long *dst_tbl, unsigned long *src_tbl,
     local_flush_tlb_range(start, end - start, PAGE_SIZE);
     return 0;
  }
+
+ static unsigned long *walk_to_leaf(unsigned long *pgdp,unsigned long va){
+	unsigned long *tbl=pgdp;
+	unsigned int shift = PGDIR_SHIFT;
+
+	while (shift > PAGE_SHIFT) {
+		unsigned long *ptep=&tbl[(va >> shift) & 0x1FF];
+	}
+ }
 #endif
