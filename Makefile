@@ -12,7 +12,17 @@
 # You should have received a copy of the GNU General Public License along with
 # this program.  If not, see <http://www.gnu.org/licenses/>.
 
-GNU = /home/tatarose/riscv/bin/riscv64-unknown-linux-gnu-
+GNU_BASE1 := /home/tatarose_laptop_wsl/riscv/bin/riscv64-unknown-linux-gnu-
+GNU_BASE2 := /home/tatarose/riscv/bin/riscv64-unknown-linux-gnu-
+ifeq ($(wildcard $(GNU_BASE1)gcc),)
+    ifeq ($(wildcard $(GNU_BASE2)gcc),)
+        $(error Neither $(GNU_BASE1) nor $(GNU_BASE2) contains a working toolchain)
+    else
+        GNU := $(GNU_BASE2)
+    endif
+else
+    GNU := $(GNU_BASE1)
+endif
 
 TOPDIR := $(shell pwd)
 

@@ -4,6 +4,8 @@
 #include <asm/tlbflush.h>
 #include <mm.h>
 #include <print.h>
+#include "string.h"
+#include "task.h"
 
 #if CONFIG_COW
 
@@ -30,8 +32,8 @@ static void copy_leaf(unsigned long *dst_ptep, unsigned long *src_ptep,
 
 /* lockstep 递归：同时走父(src)、子(dst)同一级页表 */
 static int copy_level(unsigned long *dst_tbl, unsigned long *src_tbl,
-		      unsigned long va_base, unsigned int shift, unsigned long start,
-		      unsigned long end)
+		      unsigned long va_base, unsigned int shift,
+		      unsigned long start, unsigned long end)
 {
 	int i;
 	for (i = 0; i < 512; i++) {
@@ -73,29 +75,59 @@ static int copy_level(unsigned long *dst_tbl, unsigned long *src_tbl,
 			}
 		}
 	}
-    return 0;
+	return 0;
 }
 /*
  * 把父用户区 [start,end) 复制到子：共享物理页、父子只读+COW、get_page。
  * dst_pgdp/src_pgdp 为两棵 PGD 的【虚拟地址】指针。
  */
 
- int copy_page_range(unsigned long start,unsigned long end,unsigned long *dst_pgdp, unsigned long *src_pgdp){
-    int ret=copy_level(dst_pgdp, src_pgdp, 0, PGDIR_SHIFT, start, end);
-    if (ret) {
-        return ret;
-    }
-    /* 父 PTE 被改成只读+COW，旧 TLB 项必须失效 */
-    local_flush_tlb_range(start, end - start, PAGE_SIZE);
-    return 0;
- }
-
- static unsigned long *walk_to_leaf(unsigned long *pgdp,unsigned long va){
-	unsigned long *tbl=pgdp;
-	unsigned int shift = PGDIR_SHIFT;
-
-	while (shift > PAGE_SHIFT) {
-		unsigned long *ptep=&tbl[(va >> shift) & 0x1FF];
+int copy_page_range(unsigned long start, unsigned long end,
+		    unsigned long *dst_pgdp, unsigned long *src_pgdp)
+{
+	int ret = copy_level(dst_pgdp, src_pgdp, 0, PGDIR_SHIFT, start, end);
+	if (ret) {
+		return ret;
 	}
- }
-#endif
+	/* 父 PTE 被改成只读+COW，旧 TLB 项必须失效 */
+	local_flush_tlb_range(start, end - start, PAGE_SIZE);
+	return 0;
+}
+
+int cow_handle_write(unsigned long addr, unsigned long *ptep)
+{
+	unsigned long pte = *ptep;
+	unsigned old_pa = pfn_to_phys(pte_pfn(pte));
+	struct task *task = get_current_task();
+	unsigned long asid = 0;
+
+	if (task) {
+		asid = (unsigned long)task->id;
+	} else {
+		asid = 0;
+	}
+
+	if (page_count(old_pa) == 1) {
+		// 独占叶，无需拷贝
+		set_pte(ptep, pte_uncow_mkwrite(pte));
+	} else { // 共享页
+		unsigned long new_va = (unsigned long)mm_alloc(PAGE_SIZE);
+		unsigned long new_pa, newpte;
+
+		if (!new_va) {
+			return -1;
+		}
+		memcpy((void *)new_va, (void *)phy_to_virt(old_pa), PAGE_SIZE);
+		new_pa = virt_to_phy(new_va);
+
+		newpte = (pte & ~_PAGE_PFN_MASK) |
+			 ((new_pa >> PAGE_SHIFT) << _PAGE_PFN_SHIFT);
+		set_pte(ptep, pte_uncow_mkwrite(newpte));
+
+		put_page(old_pa);
+	}
+	local_flush_tlb_page_asid(addr, asid);
+	return 0;
+}
+
+#endif // CONFIG_COW

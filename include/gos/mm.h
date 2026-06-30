@@ -91,7 +91,7 @@ unsigned long alloc_zero_page(int gfp);
 unsigned long get_phy_start(void);
 unsigned long get_phy_end(void);
 struct memory_block *get_mm_blocks(void);
-int do_page_fault(unsigned long addr);
+int do_page_fault(unsigned long addr, unsigned long cause,int from_user);
 unsigned long *mmu_get_pte_level(unsigned long virt_addr, int lvl);
 void mmu_walk_and_print_pte(unsigned long virt_addr);
 unsigned long *mmu_get_pte(unsigned long virt_addr);
@@ -126,6 +126,8 @@ int put_page(unsigned long pa);
 int page_count(unsigned long pa);
 int copy_page_range(unsigned long start, unsigned long end,
 		    unsigned long *dst_pgdp, unsigned long *src_pgdp);
+int cow_handle_write(unsigned long addr, unsigned long *ptep);
+
 #endif
 
 #endif

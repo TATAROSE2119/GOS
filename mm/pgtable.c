@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along with
  * this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+#include <asm/csr.h>
 #include <asm/pgtable.h>
 #include <asm/type.h>
 #include "device.h"
@@ -38,8 +38,7 @@ unsigned long va_pa_offset = 0;
 extern unsigned long bss_end;
 extern unsigned long __start_gos;
 
-static unsigned long *riscv_pt_walk_alloc(unsigned long *ptp,
-					  unsigned long va,
+static unsigned long *riscv_pt_walk_alloc(unsigned long *ptp, unsigned long va,
 					  unsigned int shift, int pgsize,
 					  int root,
 					  unsigned long (*pg_alloc)(int gfp),
@@ -51,21 +50,17 @@ static unsigned long *riscv_pt_walk_alloc(unsigned long *ptp,
 		if (!mmu_is_on)
 			pte = (unsigned long *)(ptp + ((va >> shift) & 0x1FF));
 		else
-			pte =
-			    (unsigned long *)phy_to_virt(ptp +
-							 ((va >> shift) &
-							  0x1FF));
+			pte = (unsigned long *)phy_to_virt(
+			    ptp + ((va >> shift) & 0x1FF));
 	} else {
 		if (!mmu_is_on)
-			pte = (unsigned long *)((unsigned long *)
-						pfn_to_phys(pte_pfn(*ptp)) +
+			pte = (unsigned long *)((unsigned long *)pfn_to_phys(
+						    pte_pfn(*ptp)) +
 						((va >> shift) & 0x1FF));
 		else
-			pte = (unsigned long *)phy_to_virt((unsigned long *)
-							   pfn_to_phys(pte_pfn
-								       (*ptp)) +
-							   ((va >> shift) &
-							    0x1FF));
+			pte = (unsigned long *)phy_to_virt(
+			    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
+			    ((va >> shift) & 0x1FF));
 	}
 
 	if ((1UL << shift) <= pgsize) {
@@ -80,11 +75,12 @@ static unsigned long *riscv_pt_walk_alloc(unsigned long *ptp,
 		*pte = (pfn << _PAGE_PFN_SHIFT) | _PAGE_PRESENT;
 	}
 
-	return riscv_pt_walk_alloc(pte, va, shift - 9, pgsize, 0,
-				   pg_alloc, gfp);
+	return riscv_pt_walk_alloc(pte, va, shift - 9, pgsize, 0, pg_alloc,
+				   gfp);
 }
 
-static unsigned long *mmu_pt_walk_fetch_one(unsigned long *ptp, unsigned long va,
+static unsigned long *mmu_pt_walk_fetch_one(unsigned long *ptp,
+					    unsigned long va,
 					    unsigned int shift, int root)
 {
 	unsigned long *pte;
@@ -93,22 +89,16 @@ static unsigned long *mmu_pt_walk_fetch_one(unsigned long *ptp, unsigned long va
 		if (!mmu_is_on)
 			pte = (unsigned long *)(ptp + ((va >> shift) & 0x1FF));
 		else
-			pte =
-			    (unsigned long *)phy_to_virt(ptp +
-							 ((va >> shift) &
-							  0x1FF));
+			pte = (unsigned long *)phy_to_virt(
+			    ptp + ((va >> shift) & 0x1FF));
 	} else {
 		if (!mmu_is_on)
-			pte =
-			    (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
-					      ((va >> shift) & 0x1FF));
+			pte = (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
+						((va >> shift) & 0x1FF));
 		else
-			pte = (unsigned long *)(phy_to_virt((unsigned long *)
-							    pfn_to_phys(pte_pfn
-									(*ptp))
-							    +
-							    ((va >> shift) &
-							     0x1FF)));
+			pte = (unsigned long *)(phy_to_virt(
+			    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
+			    ((va >> shift) & 0x1FF)));
 	}
 
 	return pte;
@@ -123,22 +113,16 @@ static unsigned long *mmu_pt_walk_fetch(unsigned long *ptp, unsigned long va,
 		if (!mmu_is_on)
 			pte = (unsigned long *)(ptp + ((va >> shift) & 0x1FF));
 		else
-			pte =
-			    (unsigned long *)phy_to_virt(ptp +
-							 ((va >> shift) &
-							  0x1FF));
+			pte = (unsigned long *)phy_to_virt(
+			    ptp + ((va >> shift) & 0x1FF));
 	} else {
 		if (!mmu_is_on)
-			pte =
-			    (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
-					      ((va >> shift) & 0x1FF));
+			pte = (unsigned long *)(pfn_to_phys(pte_pfn(*ptp)) +
+						((va >> shift) & 0x1FF));
 		else
-			pte = (unsigned long *)(phy_to_virt((unsigned long *)
-							    pfn_to_phys(pte_pfn
-									(*ptp))
-							    +
-							    ((va >> shift) &
-							     0x1FF)));
+			pte = (unsigned long *)(phy_to_virt(
+			    (unsigned long *)pfn_to_phys(pte_pfn(*ptp)) +
+			    ((va >> shift) & 0x1FF)));
 	}
 
 	if (pmd_leaf(*pte))
@@ -193,10 +177,8 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 
 	while (page_nr--) {
 		pfn = (unsigned long)phy_addr >> PAGE_SHIFT;
-		pte =
-		    riscv_pt_walk_alloc(_pgdp,
-					virt_addr, PGDIR_SHIFT, page_size, 1,
-					alloc_zero_page, 0);
+		pte = riscv_pt_walk_alloc(_pgdp, virt_addr, PGDIR_SHIFT,
+					  page_size, 1, alloc_zero_page, 0);
 		if (!pte)
 			return -1;
 
@@ -212,24 +194,26 @@ static int __mmu_page_mapping(unsigned long *_pgdp, unsigned long phy,
 }
 
 static int __mmu_page_mapping_4k(unsigned long *_pgdp, unsigned long phy,
-			      unsigned long virt, unsigned int size,
-			      pgprot_t pgprot)
+				 unsigned long virt, unsigned int size,
+				 pgprot_t pgprot)
 {
 	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot, PAGE_SHIFT);
 }
 
 static int __mmu_page_mapping_2M(unsigned long *_pgdp, unsigned long phy,
-			      unsigned long virt, unsigned int size,
-			      pgprot_t pgprot)
+				 unsigned long virt, unsigned int size,
+				 pgprot_t pgprot)
 {
-	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot, PAGE_2M_SHIFT);
+	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot,
+				  PAGE_2M_SHIFT);
 }
 
 static int __mmu_page_mapping_1G(unsigned long *_pgdp, unsigned long phy,
-			      unsigned long virt, unsigned int size,
-			      pgprot_t pgprot)
+				 unsigned long virt, unsigned int size,
+				 pgprot_t pgprot)
 {
-	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot, PAGE_1G_SHIFT);
+	return __mmu_page_mapping(_pgdp, phy, virt, size, pgprot,
+				  PAGE_1G_SHIFT);
 }
 
 unsigned long *mmu_get_pte(unsigned long virt_addr)
@@ -302,10 +286,8 @@ int mmu_page_mapping_lazy(unsigned long virt, unsigned int size,
 	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
 	while (page_nr--) {
-		pte =
-		    riscv_pt_walk_alloc(pgdp,
-					virt_addr, PGDIR_SHIFT, PAGE_SIZE, 1,
-					alloc_zero_page, 0);
+		pte = riscv_pt_walk_alloc(pgdp, virt_addr, PGDIR_SHIFT,
+					  PAGE_SIZE, 1, alloc_zero_page, 0);
 		if (!pte)
 			return -1;
 
@@ -357,7 +339,8 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 {
 	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
-	if (__mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size, pgprot))
+	if (__mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size,
+				  pgprot))
 		return -1;
 
 	local_flush_tlb_range(virt, size, PAGE_SIZE);
@@ -365,12 +348,13 @@ int mmu_page_mapping(unsigned long phy, unsigned long virt, unsigned int size,
 	return 0;
 }
 
-int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size,
-		        pgprot_t pgprot)
+int mmu_page_mapping_2M(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot)
 {
 	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
-	if (__mmu_page_mapping_2M((unsigned long *)pgdp, phy, virt, size, pgprot))
+	if (__mmu_page_mapping_2M((unsigned long *)pgdp, phy, virt, size,
+				  pgprot))
 		return -1;
 
 	local_flush_tlb_range(virt, size, PAGE_2M_SIZE);
@@ -378,12 +362,13 @@ int mmu_page_mapping_2M(unsigned long phy, unsigned long virt, unsigned int size
 	return 0;
 }
 
-int mmu_page_mapping_1G(unsigned long phy, unsigned long virt, unsigned int size,
-		        pgprot_t pgprot)
+int mmu_page_mapping_1G(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot)
 {
 	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
-	if (__mmu_page_mapping_1G((unsigned long *)pgdp, phy, virt, size, pgprot))
+	if (__mmu_page_mapping_1G((unsigned long *)pgdp, phy, virt, size,
+				  pgprot))
 		return -1;
 
 	local_flush_tlb_range(virt, size, PAGE_1G_SIZE);
@@ -396,7 +381,8 @@ static int get_napot_order(unsigned int size)
 {
 	int order;
 
-	for_each_napot_order(order) {
+	for_each_napot_order(order)
+	{
 		if ((1UL << (order + PAGE_SHIFT)) == size)
 			return order;
 	}
@@ -404,8 +390,9 @@ static int get_napot_order(unsigned int size)
 	return -1;
 }
 
-static int __mmu_page_mapping_napot(unsigned long phy, unsigned long virt, unsigned int size,
-			   pgprot_t pgprot, int page_size)
+static int __mmu_page_mapping_napot(unsigned long phy, unsigned long virt,
+				    unsigned int size, pgprot_t pgprot,
+				    int page_size)
 {
 	int i, order;
 	int pte_num = page_size / PAGE_SIZE;
@@ -433,9 +420,11 @@ static int __mmu_page_mapping_napot(unsigned long phy, unsigned long virt, unsig
 
 	while (n) {
 		for (i = 0; i < pte_num; i++) {
-			__mmu_page_mapping_4k((unsigned long *)pgdp, pa, va, PAGE_SIZE, new_pg);
+			__mmu_page_mapping_4k((unsigned long *)pgdp, pa, va,
+					      PAGE_SIZE, new_pg);
 			pte = mmu_get_pte(va);
-			*pte = (*pte & (~napot_mask)) | ((napot_bits) & napot_mask);
+			*pte =
+			    (*pte & (~napot_mask)) | ((napot_bits)&napot_mask);
 			pa += PAGE_SIZE;
 			va += PAGE_SIZE;
 		}
@@ -445,63 +434,63 @@ static int __mmu_page_mapping_napot(unsigned long phy, unsigned long virt, unsig
 	local_flush_tlb_range(virt, size, PAGE_SIZE);
 
 	return 0;
-
 }
 
-int mmu_page_mapping_8k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_8k(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot)
 {
 	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_8K_SIZE);
 }
 
-int mmu_page_mapping_16k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_16k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot)
 {
 	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_16K_SIZE);
 }
 
-int mmu_page_mapping_32k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_32k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot)
 {
 	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_32K_SIZE);
 }
 
-int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_64k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot)
 {
 	return __mmu_page_mapping_napot(phy, virt, size, pgprot, PAGE_64K_SIZE);
 }
 #else
-int mmu_page_mapping_8k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_8k(unsigned long phy, unsigned long virt,
+			unsigned int size, pgprot_t pgprot)
 {
 	return -1;
 }
-int mmu_page_mapping_16k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
-{
-	return -1;
-}
-
-int mmu_page_mapping_32k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_16k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot)
 {
 	return -1;
 }
 
-int mmu_page_mapping_64k(unsigned long phy, unsigned long virt, unsigned int size,
-			 pgprot_t pgprot)
+int mmu_page_mapping_32k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot)
+{
+	return -1;
+}
+
+int mmu_page_mapping_64k(unsigned long phy, unsigned long virt,
+			 unsigned int size, pgprot_t pgprot)
 {
 	return -1;
 }
 #endif
 
-int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt, unsigned int size,
-			       pgprot_t pgprot)
+int mmu_page_mapping_no_sfence(unsigned long phy, unsigned long virt,
+			       unsigned int size, pgprot_t pgprot)
 {
 	unsigned long *pgdp = (unsigned long *)get_default_pgd();
 
-	return __mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size, pgprot);
+	return __mmu_page_mapping_4k((unsigned long *)pgdp, phy, virt, size,
+				     pgprot);
 }
 
 int mmu_direct_page_mapping()
@@ -527,9 +516,11 @@ int mmu_direct_page_mapping()
 #if CONFIG_SELECT_4K_DIRECT_MAPPING
 		ret = mmu_page_mapping(start, phy_to_virt(start), size, pgprot);
 #elif CONFIG_SELECT_2M_DIRECT_MAPPING
-		ret = mmu_page_mapping_2M(start, phy_to_virt(start), size, pgprot);
+		ret = mmu_page_mapping_2M(start, phy_to_virt(start), size,
+					  pgprot);
 #elif CONFIG_SELECT_1G_DIRECT_MAPPING
-		ret = mmu_page_mapping_1G(start, phy_to_virt(start), size, pgprot);
+		ret = mmu_page_mapping_1G(start, phy_to_virt(start), size,
+					  pgprot);
 #endif
 		if (ret)
 			return ret;
@@ -576,9 +567,8 @@ static int mmu_code_page_mapping()
 	unsigned int size = phy_end - phy_start;
 	unsigned long virt_start = (unsigned long)&__start_gos;
 
-	pgprot =
-	    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
-		     _PAGE_DIRTY);
+	pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC |
+			  _PAGE_DIRTY);
 
 	print("Code mapping: start:0x%lx size:0x%lx\n", phy_start, size);
 	return mmu_page_mapping_2M(phy_start, virt_start, size, pgprot);
@@ -592,7 +582,7 @@ void enable_mmu(int on)
 		write_csr(satp, 0);
 		mmu_is_on = 0;
 	} else {
-		__asm__ __volatile("sfence.vma":::"memory");
+		__asm__ __volatile("sfence.vma" ::: "memory");
 
 		write_csr(satp,
 			  (((unsigned long)pgdp) >> PAGE_SHIFT) | SATP_MODE);
@@ -658,9 +648,8 @@ static int handle_fault(unsigned long addr)
 			phy_start =
 			    virt_to_phy((unsigned long)mm_alloc(PAGE_SIZE));
 
-		pgprot =
-		    __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE | _PAGE_EXEC
-			     | _PAGE_DIRTY);
+		pgprot = __pgprot(_PAGE_BASE | _PAGE_READ | _PAGE_WRITE |
+				  _PAGE_EXEC | _PAGE_DIRTY);
 
 		ret =
 		    mmu_page_mapping(phy_start, virt_start, PAGE_SIZE, pgprot);
@@ -669,8 +658,21 @@ static int handle_fault(unsigned long addr)
 	return ret;
 }
 
-int do_page_fault(unsigned long addr)
+int do_page_fault(unsigned long addr, unsigned long cause, int from_user)
 {
+#if CONFIG_COW
+	/* COW 写保护缺页：必须在下面 VMAP 检查之前（用户页是低地址、PTE
+	 * 还有效） */
+	if (cause == EXC_STORE_PAGE_FAULT) {
+		unsigned long *pgdp = (unsigned long *)get_current_pgd();
+		unsigned long *ptep =
+		    mmu_pt_walk_fetch(pgdp, addr, PGDIR_SHIFT, 1);
+
+		if (ptep && pte_is_valid(*ptep) && pte_is_cow(*ptep) &&
+		    !(*ptep & _PAGE_WRITE))
+			return cow_handle_write(addr, ptep);
+	}
+#endif // CONFIG_COW
 	print("Page Fault -- fault addr:0x%lx\n", addr);
 
 	if ((addr < VMAP_START) || (addr > VMAP_END))
@@ -685,10 +687,7 @@ int do_page_fault(unsigned long addr)
 	return handle_fault(addr);
 }
 
-unsigned long get_default_pgd(void)
-{
-	return (unsigned long)default_pgdp_pa;
-}
+unsigned long get_default_pgd(void) { return (unsigned long)default_pgdp_pa; }
 
 unsigned long get_current_pgd(void)
 {

@@ -29,14 +29,15 @@
 extern void do_exception_vector(void);
 
 struct fault_info {
-	int (*fn)(struct pt_regs * regs, const char *name);
+	int (*fn)(struct pt_regs *regs, const char *name);
 	const char *name;
 };
 
 void panic()
 {
 	print("Kernel panic\n");
-	while (1) ;
+	while (1)
+		;
 }
 
 void show_regs(struct pt_regs *regs)
@@ -75,19 +76,18 @@ static void do_trap_error(struct pt_regs *regs, const char *str)
 		print("sstatus:0x%lx  sbadaddr:0x%lx  scause:0x%lx\n",
 		      regs->sstatus, regs->sbadaddr, regs->scause);
 	else
-		print
-		    ("sstatus:0x%lx  sbadaddr:0x%lx scause:0x%lx\n",
-		     regs->sstatus, regs->sbadaddr, regs->scause);
+		print("sstatus:0x%lx  sbadaddr:0x%lx scause:0x%lx\n",
+		      regs->sstatus, regs->sbadaddr, regs->scause);
 	print("stval:0x%lx\n", read_csr(CSR_STVAL));
-	//panic();
+	// panic();
 }
 
-#define DO_ERROR_INFO(name)				\
-int name(struct pt_regs *regs, const char *str)				\
-{									\
-	do_trap_error(regs, str);	\
-	return 0;            \
-}
+#define DO_ERROR_INFO(name)                                                    \
+	int name(struct pt_regs *regs, const char *str)                        \
+	{                                                                      \
+		do_trap_error(regs, str);                                      \
+		return 0;                                                      \
+	}
 
 DO_ERROR_INFO(do_trap_unknown_info);
 DO_ERROR_INFO(do_trap_insn_misaligned_info);
@@ -103,22 +103,22 @@ DO_ERROR_INFO(do_trap_break_info);
 DO_ERROR_INFO(do_page_fault_info);
 
 static struct fault_info fault_info[] = {
-	{ do_trap_insn_misaligned_info, "Instruction address misaligned" },
-	{ do_trap_insn_fault_info, "Instruction access fault" },
-	{ do_trap_insn_illegal_info, "Illegal instruction" },
-	{ do_trap_break_info, "Breakpoint" },
-	{ do_trap_load_misaligned_info, "Load address misaligned" },
-	{ do_trap_load_fault_info, "Load access fault" },
-	{ do_trap_store_misaligned_info, "Store/AMO address misaligned" },
-	{ do_trap_store_fault_info, "Store/AMO access fault" },
-	{ do_trap_ecall_u_info, "Environment call from U-mode" },
-	{ do_trap_ecall_s_info, "Environment call from S-mode" },
-	{ do_trap_unknown_info, "unknown 10" },
-	{ do_trap_unknown_info, "unknown 11" },
-	{ do_page_fault_info, "Instruction page fault" },
-	{ do_page_fault_info, "Load page fault" },
-	{ do_trap_unknown_info, "unknown 14" },
-	{ do_page_fault_info, "Store/AMO page fault" },
+    {do_trap_insn_misaligned_info, "Instruction address misaligned"},
+    {do_trap_insn_fault_info, "Instruction access fault"},
+    {do_trap_insn_illegal_info, "Illegal instruction"},
+    {do_trap_break_info, "Breakpoint"},
+    {do_trap_load_misaligned_info, "Load address misaligned"},
+    {do_trap_load_fault_info, "Load access fault"},
+    {do_trap_store_misaligned_info, "Store/AMO address misaligned"},
+    {do_trap_store_fault_info, "Store/AMO access fault"},
+    {do_trap_ecall_u_info, "Environment call from U-mode"},
+    {do_trap_ecall_s_info, "Environment call from S-mode"},
+    {do_trap_unknown_info, "unknown 10"},
+    {do_trap_unknown_info, "unknown 11"},
+    {do_page_fault_info, "Instruction page fault"},
+    {do_page_fault_info, "Load page fault"},
+    {do_trap_unknown_info, "unknown 14"},
+    {do_page_fault_info, "Store/AMO page fault"},
 };
 
 static struct fault_info *ec_to_fault_info(unsigned int scause)
@@ -133,7 +133,6 @@ static void do_ebreak(struct pt_regs *regs)
 	fi = ec_to_fault_info(EXC_BREAKPOINT);
 	if (fi)
 		fi->fn(regs, fi->name);
-
 }
 
 static void try_to_kill_task(struct pt_regs *regs)
@@ -182,7 +181,8 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 	case EXC_STORE_PAGE_FAULT:
 	case EXC_LOAD_PAGE_FAULT:
 	case EXC_INST_PAGE_FAULT:
-		ret = do_page_fault(regs->sbadaddr);
+		ret = do_page_fault(regs->sbadaddr, cause,
+				    !(regs->sstatus & SSTATUS_SPP));
 		if (ret)
 			dump_fault_addr_pt(regs->sbadaddr);
 		break;
@@ -215,8 +215,7 @@ int do_exception(struct pt_regs *regs, unsigned long scause)
 	} else {
 		if (scause == EXC_BREAKPOINT) {
 			do_breakpoint(regs);
-		}
-		else if (handle_exception(regs, scause)) {
+		} else if (handle_exception(regs, scause)) {
 			try_to_kill_task(regs);
 		}
 	}
