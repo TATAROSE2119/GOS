@@ -23,6 +23,14 @@ if [ "$#" -eq 1 ];then
 		bear -- make $1
 		exit 0
 
+	elif [ "$1" = "run-single" ];then
+		bear -- make $1
+		exit 0
+	
+	elif [ "$1" = "run-single-debug" ];then
+		bear -- make $1
+		exit 0
+
 	elif [ "$1" = "clean" ];then
 		bear -- make $1
 		exit 0
