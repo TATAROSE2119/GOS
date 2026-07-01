@@ -17,6 +17,7 @@
 #include "user.h"
 #include "stub.h"
 #include "mm.h"
+#include "task.h"
 #include "asm/csr.h"
 #include "print.h"
 #include "uaccess.h"
@@ -122,6 +123,15 @@ int do_user_exception(struct user *user, struct pt_regs *regs)
 			ret = -1;
 			break;
 		}
+	} else {
+		/*
+		 * U 态被中断。定时器中断则主动让出 CPU：schedule() 把当前用户
+		 * 任务移到队尾并立即重设定时器；返回用户循环 enable_local_irq()
+		 * 时定时器打到内核 do_exception 完成任务切换，使 fork 出的子任务
+		 * (及其他任务) 得以运行。否则 U 态任务不可抢占，父会独占 CPU。
+		 */
+		if ((regs->scause & ~(1UL << 63)) == INTERRUPT_CAUSE_TIMER)
+			schedule();
 	}
 	return ret;
 }

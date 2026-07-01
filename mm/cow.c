@@ -59,6 +59,7 @@ static int copy_level(unsigned long *dst_tbl, unsigned long *src_tbl,
 			unsigned long *dst_child;
 
 			if (dst_tbl[i] == 0) {
+				/* 子无此级表，新建空表 */
 				unsigned long pa = alloc_zero_page(0);
 				if (!pa) {
 					return -1;
@@ -66,7 +67,23 @@ static int copy_level(unsigned long *dst_tbl, unsigned long *src_tbl,
 				dst_tbl[i] = (pa >> PAGE_SHIFT)
 						 << _PAGE_PFN_SHIFT |
 					     _PAGE_PRESENT;
+			} else if (dst_tbl[i] == src_pte) {
+				/*
+				 * 子该项与父指向同一张下级表(memcpy 内核 PGD 继承
+				 * 而来)。直接写会连带改到父/内核共享的表。克隆一份
+				 * (复制整表以保留内核等兄弟项)，令子拥有私有下级表。
+				 */
+				unsigned long pa = alloc_zero_page(0);
+				if (!pa) {
+					return -1;
+				}
+				memcpy((void *)phy_to_virt(pa),
+				       (void *)src_child, PAGE_SIZE);
+				dst_tbl[i] = (pa >> PAGE_SHIFT)
+						 << _PAGE_PFN_SHIFT |
+					     _PAGE_PRESENT;
 			}
+			/* else: 子已有私有表(前一 region 克隆)，复用 */
 			dst_child = (unsigned long *)phy_to_virt(
 			    pfn_to_phys(pte_pfn(dst_tbl[i])));
 			if (copy_level(dst_child, src_child, va, shift - 9,
