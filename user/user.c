@@ -400,6 +400,20 @@ int do_fork(struct user *parent)
 	}
 	memcpy((char *)child_pgdp, (char *)default_pgd, PAGE_SIZE);
 
+	/*
+	 * memcpy 连内核 PGD 的用户区顶层项也复制了过来，那些项指向父/内核
+	 * 共享的下级用户页表。若不清零，copy_page_range 会因 dst 项非零而
+	 * 直接写进共享表，父子无法隔离。清掉用户区顶层项，强制为子建独立表。
+	 * (sv48 下用户区 [0,512GB) 全在 PGD[0])
+	 */
+	{
+		unsigned long va;
+		for (va = 0; va < USER_SPACE_TOTAL_SIZE;
+		     va += (1UL << PGDIR_SHIFT))
+			((unsigned long *)child_pgdp)[(va >> PGDIR_SHIFT) &
+						      0x1FF] = 0;
+	}
+
 	list_for_each_entry(region, &parent->memory_region, list)
 	{
 		if (copy_page_range(region->start, region->end,

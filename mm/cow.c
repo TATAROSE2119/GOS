@@ -97,15 +97,9 @@ int copy_page_range(unsigned long start, unsigned long end,
 int cow_handle_write(unsigned long addr, unsigned long *ptep)
 {
 	unsigned long pte = *ptep;
-	unsigned old_pa = pfn_to_phys(pte_pfn(pte));
+	unsigned long old_pa = pfn_to_phys(pte_pfn(pte));
 	struct task *task = get_current_task();
-	unsigned long asid = 0;
-
-	if (task) {
-		asid = (unsigned long)task->id;
-	} else {
-		asid = 0;
-	}
+	unsigned long asid = task ? (unsigned long)task->id : 0;
 
 	if (page_count(old_pa) == 1) {
 		// 独占叶，无需拷贝
@@ -128,6 +122,42 @@ int cow_handle_write(unsigned long addr, unsigned long *ptep)
 	}
 	local_flush_tlb_page_asid(addr, asid);
 	return 0;
+}
+
+/* 在 pgdp(虚拟指针) 上把 va 走到 4K 叶子 PTE；未映射返回 NULL */
+static unsigned long *walk_to_leaf(unsigned long *pgdp, unsigned long va)
+{
+	unsigned long *tbl = pgdp;
+	unsigned int shift = PGDIR_SHIFT;
+
+	while (1) {
+		unsigned long *ptep = &tbl[(va >> shift) & 0x1FF];
+
+		if (shift == PAGE_SHIFT)
+			return ptep;       /* 4K 叶子 */
+		if (*ptep == 0)
+			return NULL;       /* 中间项缺失 */
+		if (pmd_leaf(*ptep))
+			return ptep;       /* 超页叶子 */
+		tbl = (unsigned long *)phy_to_virt(pfn_to_phys(pte_pfn(*ptep)));
+		shift -= 9;
+	}
+}
+
+/*
+ * U 态 store 缺页入口：若是 COW 写保护缺页则处理并返回 0，否则返回 -1。
+ * 供 do_user_exception 调用。
+ */
+int cow_try_handle_store(unsigned long addr)
+{
+	unsigned long *pgdp = (unsigned long *)phy_to_virt(get_current_pgd());
+	unsigned long *ptep = walk_to_leaf(pgdp, addr);
+
+	if (ptep && pte_is_valid(*ptep) && pte_is_cow(*ptep) &&
+	    !(*ptep & _PAGE_WRITE))
+		return cow_handle_write(addr, ptep);
+
+	return -1;
 }
 
 #endif // CONFIG_COW

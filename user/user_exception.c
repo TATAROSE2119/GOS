@@ -16,6 +16,7 @@
 
 #include "user.h"
 #include "stub.h"
+#include "mm.h"
 #include "asm/csr.h"
 #include "print.h"
 #include "uaccess.h"
@@ -107,6 +108,15 @@ int do_user_exception(struct user *user, struct pt_regs *regs)
 			ret = do_user_illegal_inst_fault(regs, u_context);
 			u_context->sepc += 4;
 			break;
+#if CONFIG_COW
+		case EXC_STORE_PAGE_FAULT:
+			/* COW 写时复制：处理成功则原指令重执行(不动 sepc) */
+			ret = cow_try_handle_store(regs->sbadaddr);
+			if (ret) {
+				show_user_regs(regs);
+			}
+			break;
+#endif
 		default:
 			show_user_regs(regs);
 			ret = -1;

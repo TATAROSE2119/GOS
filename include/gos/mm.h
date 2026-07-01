@@ -127,6 +127,7 @@ int page_count(unsigned long pa);
 int copy_page_range(unsigned long start, unsigned long end,
 		    unsigned long *dst_pgdp, unsigned long *src_pgdp);
 int cow_handle_write(unsigned long addr, unsigned long *ptep);
+int cow_try_handle_store(unsigned long addr);
 
 #endif
 
