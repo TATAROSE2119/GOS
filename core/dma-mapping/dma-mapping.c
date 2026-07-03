@@ -22,8 +22,8 @@
 #include "asm/pgtable.h"
 #include "align.h"
 
-int dma_mapping(struct device *dev, unsigned long addr,
-		unsigned long *ret_iova, int len, int gfp)
+int dma_mapping(struct device *dev, unsigned long addr, unsigned long *ret_iova,
+		int len, int gfp)
 {
 	struct iommu_group *group;
 	struct iommu *iommu = dev->iommu;
@@ -48,8 +48,7 @@ int dma_mapping(struct device *dev, unsigned long addr,
 	if (iova == -1UL)
 		return -1;
 
-	if (-1 == iommu->ops->map_pages(dev, iova,
-					(void *)align_start_addr,
+	if (-1 == iommu->ops->map_pages(dev, iova, (void *)align_start_addr,
 					align_nr * PAGE_SIZE, 0)) {
 		iova_free(&group->iova_cookie, iova);
 		return -1;

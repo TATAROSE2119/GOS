@@ -25,7 +25,8 @@ enum {
 };
 
 struct dmac_ops {
-	int (*transfer_m2m)(unsigned long src, unsigned long dst, int size, void *priv);
+	int (*transfer_m2m)(unsigned long src, unsigned long dst, int size,
+			    void *priv);
 };
 
 struct dmac_device {
@@ -40,6 +41,7 @@ struct dmac_device *get_dmac(char *name);
 int register_dmac_device(struct dmac_device *dmac);
 void walk_all_dmac(void);
 int memcpy_hw(char *name, char *dst, char *src, unsigned int size);
-int dma_transfer(struct dmac_device *dmac, char *dst, char *src, unsigned int size, int dir);
+int dma_transfer(struct dmac_device *dmac, char *dst, char *src,
+		 unsigned int size, int dir);
 
 #endif

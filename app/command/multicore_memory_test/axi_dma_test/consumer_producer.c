@@ -39,9 +39,10 @@ struct consumer_producer_buffer {
 	struct consumer_producer_cond_t cpu_producer_complete;
 };
 
-static struct consumer_producer_buffer buffer = { 0 };
+static struct consumer_producer_buffer buffer = {0};
 
-static void consumer_producer_cond_init(struct consumer_producer_cond_t *cond, int flag)
+static void consumer_producer_cond_init(struct consumer_producer_cond_t *cond,
+					int flag)
 {
 	cond->flag = flag;
 }
@@ -51,12 +52,10 @@ static void consumer_producer_cond_wait(struct consumer_producer_cond_t *cond)
 	unsigned int tmp = 1, swap = 0;
 
 	while (1) {
-		__asm__ __volatile__ (
-			"amocas.w.aqrl %0, %2, (%1)\n"
-			: "+r"(tmp)
-			: "r"(&cond->flag), "r"(swap)
-			: "memory"
-		);
+		__asm__ __volatile__("amocas.w.aqrl %0, %2, (%1)\n"
+				     : "+r"(tmp)
+				     : "r"(&cond->flag), "r"(swap)
+				     : "memory");
 		if (tmp)
 			break;
 		tmp = 1;
@@ -71,19 +70,26 @@ static void consumer_producer_cond_signal(struct consumer_producer_cond_t *cond)
 
 static int cpu_producer_thread(void *data)
 {
-	struct consumer_producer_buffer *buffer = (struct consumer_producer_buffer *)data;
+	struct consumer_producer_buffer *buffer =
+	    (struct consumer_producer_buffer *)data;
 	char *ptr;
 	int nn = 0;
 
 	while (1) {
 		ptr = buffer->buffer + buffer->size * 2;
 		for (int i = 0; i < buffer->size; i++) {
-			consumer_producer_cond_wait(&buffer->dmac_consumer_complete);
+			consumer_producer_cond_wait(
+			    &buffer->dmac_consumer_complete);
 			buffer->test_data = nn;
 			buffer->cpu_producer_addr = ptr + i;
-			print("cpu producer %d times -- addr:0x%lx test_data:0x%x\n", nn++, buffer->cpu_producer_addr, buffer->test_data);
-			memset(buffer->cpu_producer_addr, buffer->test_data, buffer->size);
-			consumer_producer_cond_signal(&buffer->cpu_producer_complete);
+			print("cpu producer %d times -- addr:0x%lx "
+			      "test_data:0x%x\n",
+			      nn++, buffer->cpu_producer_addr,
+			      buffer->test_data);
+			memset(buffer->cpu_producer_addr, buffer->test_data,
+			       buffer->size);
+			consumer_producer_cond_signal(
+			    &buffer->cpu_producer_complete);
 			schedule();
 		}
 	}
@@ -94,19 +100,32 @@ static int cpu_producer_thread(void *data)
 static int cpu_consumer_thread(void *data)
 {
 	int nn = 0;
-	struct consumer_producer_buffer *buffer = (struct consumer_producer_buffer *)data;
+	struct consumer_producer_buffer *buffer =
+	    (struct consumer_producer_buffer *)data;
 	char *ptr;
 
 	while (1) {
 		consumer_producer_cond_wait(&buffer->dmac_producer_complete);
 		ptr = buffer->dmac_producer_addr;
+		char expected_data = (char)nn;
+
+		// for (int n = 0; n < buffer->size; n++) {
+		// 	if (ptr[n] != buffer->test_data) {
+		// 		print("%s test fail!!!\n", __FUNCTION__);
+		// 		return -1;
+		// 	}
+
+		// }
 		for (int n = 0; n < buffer->size; n++) {
-			if (ptr[n] != buffer->test_data) {
-				print("%s test fail!!!\n", __FUNCTION__);
+			if (ptr[n] != expected_data) {
+				print(
+				    "%s test fail!!! expected:0x%x got:0x%x\n",
+				    __FUNCTION__, expected_data, ptr[n]);
 				return -1;
 			}
 		}
-		print("cpu consumer %d times pass -- addr:0x%lx size:0x%lx\n", nn++, ptr, buffer->size);
+		print("cpu consumer %d times pass -- addr:0x%lx size:0x%lx\n",
+		      nn++, ptr, buffer->size);
 		consumer_producer_cond_signal(&buffer->cpu_consumer_complete);
 		schedule();
 	}
@@ -116,7 +135,8 @@ static int cpu_consumer_thread(void *data)
 
 static int dmac_producer_thread(void *data)
 {
-	struct consumer_producer_buffer *buffer = (struct consumer_producer_buffer *)data;
+	struct consumer_producer_buffer *buffer =
+	    (struct consumer_producer_buffer *)data;
 	void *src;
 	int i, j, ret = 0, nn = 0;
 
@@ -132,28 +152,38 @@ static int dmac_producer_thread(void *data)
 				char *src_ptr = buffer->cpu_producer_addr + j;
 				char *dst_ptr = buffer->buffer + j;
 
-				consumer_producer_cond_wait(&buffer->cpu_consumer_complete);
-				consumer_producer_cond_wait(&buffer->cpu_producer_complete);
+				consumer_producer_cond_wait(
+				    &buffer->cpu_consumer_complete);
+				consumer_producer_cond_wait(
+				    &buffer->cpu_producer_complete);
 
 				src_ptr = src + i;
 				dst_ptr = buffer->buffer + j;
 				buffer->test_data = nn;
 
-				memset(src_ptr, buffer->test_data, buffer->size);
+				memset(src_ptr, buffer->test_data,
+				       buffer->size);
 				memset(dst_ptr, 0, buffer->size);
 
-				print("dmac consumer %d times addr:0x%lx size:0x%lx\n", nn, src_ptr, buffer->size);
-				print("dmac producer %d times addr:0x%lx size:0x%lx\n", nn, dst_ptr, buffer->size);
+				print("dmac consumer %d times addr:0x%lx "
+				      "size:0x%lx\n",
+				      nn, src_ptr, buffer->size);
+				print("dmac producer %d times addr:0x%lx "
+				      "size:0x%lx\n",
+				      nn, dst_ptr, buffer->size);
 
 				nn++;
-				ret = memcpy_hw(buffer->dmac, dst_ptr, src_ptr, buffer->size);
+				ret = memcpy_hw(buffer->dmac, dst_ptr, src_ptr,
+						buffer->size);
 				if (ret == -1) {
 					print("memcpy_hw failed, timeout...\n");
 					return -1;
 				}
 				buffer->dmac_producer_addr = (void *)dst_ptr;
-				consumer_producer_cond_signal(&buffer->dmac_producer_complete);
-				consumer_producer_cond_signal(&buffer->dmac_consumer_complete);
+				consumer_producer_cond_signal(
+				    &buffer->dmac_producer_complete);
+				consumer_producer_cond_signal(
+				    &buffer->dmac_consumer_complete);
 				schedule();
 			}
 		}
@@ -181,9 +211,12 @@ int axi_dma_test_consumer_producer(char *name, int size)
 	consumer_producer_cond_init(&buffer.cpu_consumer_complete, 1);
 	consumer_producer_cond_init(&buffer.cpu_producer_complete, 0);
 
-	create_task("dma_test_dmac_producer", dmac_producer_thread, (void *)&buffer, 0, NULL, 0, NULL);
-	create_task("dma_test_cpu_consumer", cpu_consumer_thread, (void *)&buffer, 0, NULL, 0, NULL);
-	create_task("dma_test_cpu_producer", cpu_producer_thread, (void *)&buffer, 0, NULL, 0, NULL);
+	create_task("dma_test_dmac_producer", dmac_producer_thread,
+		    (void *)&buffer, 0, NULL, 0, NULL);
+	create_task("dma_test_cpu_consumer", cpu_consumer_thread,
+		    (void *)&buffer, 0, NULL, 0, NULL);
+	create_task("dma_test_cpu_producer", cpu_producer_thread,
+		    (void *)&buffer, 0, NULL, 0, NULL);
 
 	return 0;
 }

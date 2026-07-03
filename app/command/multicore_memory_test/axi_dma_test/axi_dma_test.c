@@ -41,8 +41,11 @@ static int __axi_dma_test(char *name, void *src, void *dst, int size)
 
 			for (n = 0; n < size; n++) {
 				if (src_ptr[n] != dst_ptr[n]) {
-					print("dma_test failed!! src_ptr:0x%lx:0x%x dst_ptr:0x%lx\n:0x%x",
-						&src_ptr[n], &dst_ptr[n], src_ptr[n], dst_ptr[n]);
+					print("dma_test failed!! "
+					      "src_ptr:0x%lx:0x%x "
+					      "dst_ptr:0x%lx\n:0x%x",
+					      &src_ptr[n], &dst_ptr[n],
+					      src_ptr[n], dst_ptr[n]);
 					return -1;
 				}
 			}
@@ -79,8 +82,8 @@ static int __axi_dma_simple_test(char *name, int _size)
 	return 0;
 }
 
-int axi_dma_test_fix(char *name, int _size,
-		     unsigned long fix_src, unsigned long fix_dst)
+int axi_dma_test_fix(char *name, int _size, unsigned long fix_src,
+		     unsigned long fix_dst)
 {
 	int size = _size, ret;
 	void *dst, *src;

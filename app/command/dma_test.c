@@ -63,7 +63,7 @@ static int cmd_dma_test_handler(int argc, char *argv[], void *priv)
 		*((char *)((unsigned long)src + i)) = i;
 
 	start_time = get_system_time_ms();
-	ret = memcpy_hw(name, dst, src, size);
+	ret = memcpy_hw(name, dst, src, size);//dma copy
 	if (ret == -1) {
 		print("memcpy_hw failed, timeout...\n");
 		return -1;

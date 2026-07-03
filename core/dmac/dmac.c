@@ -49,7 +49,8 @@ struct dmac_device *get_dmac(char *name)
 {
 	struct dmac_device *dmac;
 
-	list_for_each_entry(dmac, &dmacs, list){
+	list_for_each_entry(dmac, &dmacs, list)
+	{
 		if (!strcmp(dmac->name, name))
 			return dmac;
 	}
@@ -62,12 +63,14 @@ void walk_all_dmac(void)
 	struct dmac_device *dmac;
 	int i;
 
-	list_for_each_entry(dmac, &dmacs, list){
+	list_for_each_entry(dmac, &dmacs, list)
+	{
 		print("%s:\n", dmac->name);
 		print("    device:0x%lx\n", dmac->dev);
 		print("    device name:%s\n", dmac->dev->compatible);
 		if (dmac->dev->irq_domain) {
-			print("    irq domain: %s\n", dmac->dev->irq_domain->name);
+			print("    irq domain: %s\n",
+			      dmac->dev->irq_domain->name);
 			print("    irq:");
 			for (i = 0; i < dmac->dev->irq_num; i++)
 				print("%d ", dmac->dev->irqs[i]);
@@ -88,19 +91,22 @@ int register_dmac_device(struct dmac_device *dmac)
 	return 0;
 }
 
-int dma_transfer(struct dmac_device *dmac, char *dst, char *src, unsigned int size, int dir)
+int dma_transfer(struct dmac_device *dmac, char *dst, char *src,
+		 unsigned int size, int dir)
 {
 	unsigned long src_iova;
 	unsigned long dst_iova;
 
-	if (dmac->dev->iommu) {
-		if ((((unsigned long)dst) % PAGE_SIZE) || (((unsigned long)src) % PAGE_SIZE)) {
-			print("dma_transfer: Only support PAGE_SIZE algin memcpy\n");
+	if (dmac->dev->iommu) {//if iommu is enabled, use dma mapping
+		if ((((unsigned long)dst) % PAGE_SIZE) ||
+		    (((unsigned long)src) % PAGE_SIZE)) {
+			print("dma_transfer: Only support PAGE_SIZE algin "
+			      "memcpy\n");
 			return -1;
 		}
 	}
 
-	if (!dmac || !dmac->ops || !dmac->dev)
+	if (!dmac || !dmac->ops || !dmac->dev)	//check dmac device
 		return -1;
 
 	if (dma_mapping(dmac->dev, virt_to_phy(src), &src_iova, size, NULL))
@@ -112,17 +118,19 @@ int dma_transfer(struct dmac_device *dmac, char *dst, char *src, unsigned int si
 	if (dir == DMAC_XFER_M2M) {
 		if (!dmac->ops->transfer_m2m)
 			return -1;
-		return dmac->ops->transfer_m2m(src_iova, dst_iova, size, dmac->priv);
+		return dmac->ops->transfer_m2m(src_iova, dst_iova, size,
+					       dmac->priv);
 	}
 
 	return -1;
 }
 
-int memcpy_hw(char * name, char *dst, char *src, unsigned int size)
+int memcpy_hw(char *name, char *dst, char *src, unsigned int size)
 {
 	struct dmac_device *dmac;
 
-	list_for_each_entry(dmac, &dmacs, list) {
+	list_for_each_entry(dmac, &dmacs, list)
+	{
 		if (!strncmp(dmac->name, name, 128))
 			goto found;
 	}

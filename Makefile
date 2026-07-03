@@ -220,7 +220,7 @@ else ifeq ($(CONFIG_SELECT_AIA), y)
 run:
 	./qemu-system-riscv64 -nographic \
         -machine virt,aia=aplic-imsic,aia-guests=7 -smp 4 \
-	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on,v=on,Zfh=on,Zfhmin=on,smstateen=on -m 8G \
+	-cpu rv64,sv39=on,sv48=on,sv57=on,svnapot=on,svpbmt=on,svinval=on,zicond=on,v=on,Zfh=on,Zfhmin=on,smstateen=on,zacas=on -m 8G \
 	-device my_dmaengine \
 	-device my_chr_display \
 	-drive if=none,file=./init.img,id=nvm \
