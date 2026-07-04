@@ -337,9 +337,9 @@ int user_mode_run(struct user *user, struct user_run_params *params)
 	while (1) {
 		user_update_run_params(user);
 		disable_local_irq();
-		user_mode_switch_to(&user->cpu_context);
-		if (do_user_exception(user, regs) == -1) {
-			enable_local_irq();
+		user_mode_switch_to(&user->cpu_context);	//切换到用户态
+		if (do_user_exception(user, regs) == -1) {	//用户态异常处理
+			enable_local_irq();	//异常处理失败，返回内核态
 			break;
 		}
 		enable_local_irq();
@@ -383,17 +383,17 @@ static int user_child_start(void *data)
 int do_fork(struct user *parent)
 {
 	struct user *child;
-	struct user_memory_region *region;
-	void *child_pgdp;
-	void *default_pgd = (void *)phy_to_virt(get_default_pgd());
+	struct user_memory_region *region;	// 用户内存区域
+	void *child_pgdp;	// 子任务页表基地址
+	void *default_pgd = (void *)phy_to_virt(get_default_pgd());// 内核默认页表基地址
 
-	child = user_create_force();
+	child = user_create_force();	// 创建子任务
 	if (!child) {
 		return -1;
 	}
-	user_update_userid(child);
+	user_update_userid(child);	// 更新子任务的用户 ID
 
-	child_pgdp = mm_alloc(PAGE_SIZE);
+	child_pgdp = mm_alloc(PAGE_SIZE);	// 分配子任务页表基地址
 	if (!child_pgdp) {
 		return -1;
 	}
@@ -410,7 +410,7 @@ int do_fork(struct user *parent)
 		if (copy_page_range(region->start, region->end,
 				    (unsigned long *)child_pgdp,
 				    (unsigned long *)phy_to_virt(
-					(unsigned long)parent->pgdp))) {
+					(unsigned long)parent->pgdp))) {// 复制父任务的用户区页表到子任务
 			return -1;
 		}
 		add_user_space_memory(child, region->start,

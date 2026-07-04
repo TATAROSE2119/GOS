@@ -63,12 +63,12 @@ unsigned long sys_unmap(void *addr, unsigned int size)
 #if CONFIG_FORK
 unsigned long sys_fork(void)
 {
-	struct user *parent=get_current_user();
-	if(!parent){
+	struct user *parent = get_current_user();
+	if (!parent) {
 		return -1;
 	}
 
-	return do_fork(parent); 
+	return do_fork(parent);
 }
 #endif
 
@@ -82,7 +82,7 @@ const void *syscall_table[__NR_syscalls] = {
     __SYSCALL(__NR_print, sys_print) __SYSCALL(__NR_mmap, sys_mmap)
 	__SYSCALL(__NR_mmap_pg, sys_mmap_pg) __SYSCALL(__NR_unmap, sys_unmap)
 #if CONFIG_FORK
-	__SYSCALL(__NR_fork,sys_fork)
+	    __SYSCALL(__NR_fork, sys_fork)
 #endif
 
 };
