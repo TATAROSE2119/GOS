@@ -20,422 +20,148 @@
             --highlight-bg: rgba(59, 130, 246, 0.15);
         }
 
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Inter', sans-serif;
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            overflow: hidden;
-        }
+        body { margin: 0; padding: 0; font-family: 'JetBrains Mono', 'Fira Code', Consolas, 'Inter', sans-serif; background-color: var(--bg-base); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        header {
-            padding: 1rem 2rem;
-            background: rgba(17, 24, 39, 0.8);
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 50;
-        }
+        header { padding: 1rem 2rem; background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; z-index: 50; }
 
-        h1 {
-            margin: 0;
-            font-size: 1.4rem;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+        h1 { margin: 0; font-size: 1.4rem; font-family: 'Inter', sans-serif; background: linear-gradient(to right, var(--accent-cyan), var(--accent-blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 
-        .main-container {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
+        .main-container { display: flex; flex: 1; overflow: hidden; }
 
-        .visualization-area {
-            flex: 1;
-            padding: 2rem;
-            position: relative;
-            display: flex;
-            justify-content: space-around;
-            align-items: flex-start;
-            overflow-y: auto;
-            background-image: 
-                linear-gradient(rgba(30, 41, 59, 0.3) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(30, 41, 59, 0.3) 1px, transparent 1px);
-            background-size: 30px 30px;
-        }
+        .visualization-area { flex: 1; padding: 2rem; padding-top: 6rem; position: relative; display: flex; justify-content: space-around; align-items: flex-start; overflow-y: auto; background-image: linear-gradient(rgba(30, 41, 59, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(30, 41, 59, 0.3) 1px, transparent 1px); background-size: 30px 30px; }
 
-        .process-column {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1.5rem;
-            width: 32%;
-            z-index: 10;
-        }
+        .process-column { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; width: 32%; z-index: 10; }
 
-        .process-title {
-            font-size: 1rem;
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            padding: 0.5rem 2rem;
-            border-radius: 6px;
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
+        .process-title { font-size: 1rem; font-family: 'Inter', sans-serif; font-weight: 700; padding: 0.5rem 2rem; border-radius: 6px; background: var(--bg-panel); border: 1px solid var(--border-color); letter-spacing: 1px; text-transform: uppercase; }
 
-        .page-table {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            width: 100%;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0.2;
-            transform: scale(0.95);
-            position: relative;
-        }
+        .page-table { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; width: 100%; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.2; transform: scale(0.95); position: relative; }
+        .page-table.visible { opacity: 1; transform: scale(1); }
+        .page-table.active-table { border-color: var(--accent-blue); box-shadow: 0 0 20px rgba(59, 130, 246, 0.2); }
 
-        .page-table.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        
-        .page-table.active-table {
-            border-color: var(--accent-blue);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
-        }
-
-        .table-header {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 0.6rem;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.85rem;
-            color: var(--accent-cyan);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .table-row {
-            display: flex;
-            padding: 0.6rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-            font-size: 0.75rem;
-            align-items: center;
-            transition: all 0.3s;
-            position: relative;
-        }
-        
+        .table-header { background: rgba(0, 0, 0, 0.4); padding: 0.6rem; text-align: center; font-weight: 600; font-size: 0.85rem; color: var(--accent-cyan); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; }
+        .table-row { display: flex; padding: 0.6rem; border-bottom: 1px solid rgba(255, 255, 255, 0.03); font-size: 0.75rem; align-items: center; transition: all 0.3s; position: relative; }
         .table-row:last-child { border-bottom: none; }
+        .table-row.highlight { background-color: var(--highlight-bg); border-left: 3px solid var(--accent-blue); }
+        .table-row.reading { background-color: rgba(168, 85, 247, 0.15); border-left: 3px solid var(--accent-purple); }
+        .table-row.writing { background-color: rgba(16, 185, 129, 0.15); border-left: 3px solid var(--accent-green); box-shadow: inset 0 0 15px rgba(16, 185, 129, 0.1); }
+        .table-row.cow-target { background-color: rgba(245, 158, 11, 0.15); border-left: 3px solid var(--accent-yellow); }
+        .table-index { width: 35px; color: var(--text-muted); }
+        .table-content { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .pte-raw { color: #94a3b8; font-size: 0.7rem; display: flex; justify-content: space-between; transition: color 0.3s; }
+        .pte-flags { display: flex; gap: 3px; }
 
-        .table-row.highlight {
-            background-color: var(--highlight-bg);
-            border-left: 3px solid var(--accent-blue);
-        }
-        
-        .table-row.writing {
-            background-color: rgba(16, 185, 129, 0.15);
-            border-left: 3px solid var(--accent-green);
-        }
-        
-        .table-row.cow-target {
-            background-color: rgba(245, 158, 11, 0.15);
-            border-left: 3px solid var(--accent-yellow);
-        }
-
-        .table-index {
-            width: 35px;
-            color: var(--text-muted);
-        }
-
-        .table-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .pte-raw {
-            color: #94a3b8;
-            font-size: 0.7rem;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .pte-flags {
-            display: flex;
-            gap: 3px;
-        }
-
-        .flag {
-            padding: 1px 4px;
-            border-radius: 3px;
-            font-size: 0.65rem;
-            border: 1px solid transparent;
-            opacity: 0.3;
-        }
-
+        .flag { padding: 1px 4px; border-radius: 3px; font-size: 0.65rem; border: 1px solid transparent; opacity: 0.3; transition: all 0.3s; }
         .flag.active { opacity: 1; border-color: currentColor; }
         .flag.v { color: var(--accent-green); }
         .flag.r { color: var(--accent-blue); }
-        .flag.w { color: var(--accent-red); transition: color 0.3s, opacity 0.3s; }
+        .flag.w { color: var(--accent-red); }
         .flag.w.active { color: var(--accent-green); }
-        .flag.w.revoked { color: var(--text-muted); opacity: 0.2; text-decoration: line-through; }
-        .flag.x { color: var(--accent-purple); }
+        .flag.w.revoked { color: var(--text-muted); opacity: 0.2; text-decoration: line-through; border-color: transparent;}
         .flag.cow { color: var(--accent-yellow); background: rgba(245, 158, 11, 0.1); }
+        .flag.cow.active { background: rgba(245, 158, 11, 0.3); box-shadow: 0 0 5px var(--accent-yellow); }
 
-        .physical-memory-area {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 3rem;
-            z-index: 10;
-        }
-
-        .phys-page {
-            background: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            width: 150px;
-            text-align: center;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            opacity: 0.2;
-            transform: translateY(20px);
-        }
-
-        .phys-page.visible { opacity: 1; transform: translateY(0); }
-        .phys-page.new { border-color: var(--accent-green); box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); }
-
+        .physical-memory-area { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; gap: 3rem; z-index: 10; }
+        .phys-page { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; width: 150px; text-align: center; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.1; transform: translateY(20px) scale(0.9); }
+        .phys-page.visible { opacity: 1; transform: translateY(0) scale(1); }
+        .phys-page.new-alloc { border-color: var(--accent-green); box-shadow: 0 0 25px rgba(16, 185, 129, 0.2); animation: pop-in 0.4s ease-out; }
+        @keyframes pop-in { 0% { transform: scale(0.8); opacity: 0.5; } 50% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
         .phys-title { color: var(--text-muted); font-size: 0.8rem; margin-bottom: 0.5rem; }
         .phys-pfn { color: var(--accent-purple); font-weight: bold; margin-bottom: 0.5rem; font-size: 0.9rem;}
-        
-        .phys-data {
-            background: #000;
-            padding: 0.5rem;
-            border-radius: 4px;
-            color: #fff;
-            border: 1px dashed #333;
-        }
+        .phys-data { background: #000; padding: 0.5rem; border-radius: 4px; color: #fff; border: 1px dashed #333; position: relative; overflow: hidden; }
+        .copy-effect { position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.4), transparent); animation: sweep 1s ease-in-out; pointer-events: none; }
+        @keyframes sweep { 0% { left: -100%; } 100% { left: 100%; } }
 
-        /* SVG Lines */
-        svg.connections {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1;
-        }
+        svg.connections { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        path.link { fill: none; stroke: var(--border-color); stroke-width: 1.5; transition: stroke-dashoffset 0.6s ease-in-out, stroke 0.3s; stroke-dasharray: 1000; stroke-dashoffset: 1000; }
+        path.link.drawn { stroke-dashoffset: 0; }
+        path.link.active { stroke: var(--accent-blue); stroke-width: 2; }
+        path.link.allocating { stroke: var(--accent-green); stroke-dasharray: 5 5; animation: flow 2s linear infinite; stroke-dashoffset: 0; }
+        path.link.cow-link { stroke: var(--accent-yellow); stroke-width: 2; }
+        path.link.fault { stroke: var(--accent-red); stroke-width: 3; animation: pulse-red 0.8s infinite; stroke-dashoffset: 0; stroke-dasharray: none; }
+        @keyframes flow { from { stroke-dashoffset: 20; } to { stroke-dashoffset: 0; } }
+        @keyframes pulse-red { 0% { filter: drop-shadow(0 0 2px var(--accent-red)); } 50% { filter: drop-shadow(0 0 8px var(--accent-red)); } 100% { filter: drop-shadow(0 0 2px var(--accent-red)); } }
 
-        path.link {
-            fill: none;
-            stroke: var(--border-color);
-            stroke-width: 1.5;
-            transition: all 0.3s linear;
-            stroke-dasharray: 10 5;
-            animation: dash 30s linear infinite;
-        }
-
-        @keyframes dash { to { stroke-dashoffset: -1000; } }
-
-        path.link.active { stroke: var(--accent-blue); stroke-width: 2; stroke-dasharray: none; animation: none;}
-        path.link.allocating { stroke: var(--accent-green); stroke-dasharray: 5 5; animation: dash 5s linear infinite; }
-        path.link.cow-link { stroke: var(--accent-yellow); stroke-width: 2; stroke-dasharray: none; animation: none; }
-        path.link.fault { stroke: var(--accent-red); stroke-width: 3; stroke-dasharray: none; animation: pulse-red 1s infinite; }
-
-        @keyframes pulse-red {
-            0% { filter: drop-shadow(0 0 2px var(--accent-red)); }
-            50% { filter: drop-shadow(0 0 8px var(--accent-red)); }
-            100% { filter: drop-shadow(0 0 2px var(--accent-red)); }
-        }
-
-        /* Side Panel */
-        .control-panel {
-            width: 420px;
-            background: rgba(17, 24, 39, 0.95);
-            border-left: 1px solid var(--border-color);
-            padding: 0;
-            display: flex;
-            flex-direction: column;
-            z-index: 20;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-        }
-        
-        .panel-header {
-            padding: 1.5rem 1.5rem 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        .step-indicator {
-            font-size: 0.75rem;
-            color: var(--accent-cyan);
-            letter-spacing: 2px;
-            margin-bottom: 0.5rem;
-        }
-
-        .step-title {
-            font-size: 1.2rem;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            color: #fff;
-        }
-
-        .panel-body {
-            padding: 1.5rem;
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .explanation {
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: #cbd5e1;
-        }
-
-        .code-window {
-            background: #000;
-            border-radius: 6px;
-            border: 1px solid #333;
-            overflow: hidden;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-        }
-        
-        .code-header {
-            background: #1e293b;
-            padding: 0.4rem 1rem;
-            font-size: 0.7rem;
-            color: #94a3b8;
-            border-bottom: 1px solid #333;
-        }
-
-        .code-content {
-            padding: 1rem;
-            font-size: 0.8rem;
-            line-height: 1.5;
-            color: #e2e8f0;
-            margin: 0;
-            overflow-x: auto;
-        }
-
-        .code-content .keyword { color: #c678dd; }
-        .code-content .func { color: #61afef; }
+        .control-panel { width: 420px; background: rgba(17, 24, 39, 0.95); border-left: 1px solid var(--border-color); padding: 0; display: flex; flex-direction: column; z-index: 20; box-shadow: -10px 0 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        .panel-header { padding: 1.5rem 1.5rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .step-indicator { font-size: 0.75rem; color: var(--accent-cyan); letter-spacing: 2px; margin-bottom: 0.5rem; }
+        .step-title { font-size: 1.2rem; font-family: 'Inter', sans-serif; margin: 0; color: #fff; }
+        .panel-body { padding: 1.5rem; flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 1rem; }
+        .explanation { font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6; color: #cbd5e1; }
+        .code-window { background: #000; border-radius: 6px; border: 1px solid #333; overflow: hidden; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
+        .code-header { background: #1e293b; padding: 0.4rem 1rem; font-size: 0.7rem; color: #94a3b8; border-bottom: 1px solid #333; }
+        .code-content { padding: 1rem; font-size: 0.8rem; line-height: 1.5; color: #e2e8f0; margin: 0; overflow-x: auto; transition: all 0.3s; }
         .code-content .comment { color: #5c6370; font-style: italic; }
-        .code-content .string { color: #98c379; }
-        .code-content .num { color: #d19a66; }
-        
-        .highlight-line {
-            background: rgba(59, 130, 246, 0.2);
-            border-left: 2px solid var(--accent-blue);
-            display: block;
-            margin: 0 -1rem;
-            padding: 0 1rem;
-        }
-        
-        .pte-builder {
-            background: rgba(16, 185, 129, 0.05);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-            border-radius: 6px;
-            padding: 1rem;
-            font-size: 0.8rem;
-        }
-        
-        .pte-builder-title {
-            color: var(--accent-green);
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-
-        .panel-footer {
-            padding: 1.5rem;
-            background: #0f172a;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            gap: 1rem;
-        }
-
-        button {
-            flex: 1;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 0.9rem;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            background: transparent;
-            color: var(--text-main);
-            transition: all 0.2s;
-        }
-
+        .highlight-line { background: rgba(59, 130, 246, 0.2); border-left: 2px solid var(--accent-blue); display: block; margin: 0 -1rem; padding: 0 1rem; transition: background 0.3s;}
+        .highlight-line.executing { background: rgba(16, 185, 129, 0.2); border-color: var(--accent-green); }
+        .pte-builder { background: rgba(16, 185, 129, 0.05); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 6px; padding: 1rem; font-size: 0.8rem; transition: opacity 0.3s; }
+        .pte-builder-title { color: var(--accent-green); margin-bottom: 0.5rem; font-weight: bold; }
+        .panel-footer { padding: 1.5rem; background: #0f172a; border-top: 1px solid var(--border-color); display: flex; gap: 1rem; }
+        button { flex: 1; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; font-size: 0.9rem; font-family: 'Inter', sans-serif; cursor: pointer; background: transparent; color: var(--text-main); transition: all 0.2s; }
         button:hover:not(:disabled) { background: rgba(255,255,255,0.05); }
-        
-        button.primary {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-            color: white;
-            font-weight: 600;
-        }
-
-        button.primary:hover:not(:disabled) {
-            background: #2563eb;
-            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
-        }
-        
+        button.primary { background: var(--accent-blue); border-color: var(--accent-blue); color: white; font-weight: 600; }
+        button.primary:hover:not(:disabled) { background: #2563eb; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
         button:disabled { opacity: 0.3; cursor: not-allowed; }
         
-        /* Floating Labels */
-        .float-label {
-            position: absolute;
-            background: var(--bg-panel);
-            border: 1px solid var(--accent-cyan);
-            color: var(--accent-cyan);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            z-index: 100;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-        }
+        .float-label { position: absolute; background: var(--bg-panel); border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; z-index: 100; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
         .float-label.visible { opacity: 1; }
+
+        /* Translation Monitor */
+        .translation-monitor {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%); width: 85%;
+            background: rgba(17, 24, 39, 0.85); border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 12px 20px; z-index: 100; display: flex; flex-direction: column; gap: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        }
+        .monitor-row { display: flex; align-items: center; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem;}
+        .monitor-label { font-weight: bold; width: 110px; padding: 3px 8px; border-radius: 4px; text-align: center; }
+        .monitor-label.parent { background: rgba(59, 130, 246, 0.15); color: var(--accent-blue); border: 1px solid var(--accent-blue); }
+        .monitor-label.child { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); border: 1px solid var(--accent-purple); }
+        .monitor-va { color: #e2e8f0; font-weight: bold; background: #000; padding: 3px 8px; border-radius: 4px; border: 1px solid #333;}
+        .monitor-arrow { color: var(--text-muted); font-weight: bold; font-size: 1rem; }
+        .monitor-pa { color: var(--accent-green); background: #000; padding: 3px 8px; border-radius: 4px; border: 1px solid #333; transition: all 0.3s; width: 220px; text-align: center; }
+        .monitor-data { color: #f8fafc; font-weight: bold; background: rgba(0,0,0,0.5); padding: 3px 8px; border-radius: 4px; min-width: 80px; text-align: center; transition: all 0.3s;}
     </style>
 </head>
 <body>
 
     <header>
         <h1>GOS Sv39 `fork` & `COW` 核心源码级微观推演</h1>
-        <div style="font-size: 0.8rem; color: var(--text-muted);">精确到 `copy_page_range`, `copy_level`, `copy_leaf` 每一行</div>
+        <div style="font-size: 0.8rem; color: var(--text-muted);">精确到 `copy_page_range`, `copy_level`, `copy_leaf` 每一行机器指令逻辑</div>
     </header>
 
     <div class="main-container">
         <div class="visualization-area" id="vis-area">
+            
+            <!-- Translation Monitor -->
+            <div class="translation-monitor">
+                <div class="monitor-row">
+                    <div class="monitor-label parent">Parent MMU</div>
+                    <div class="monitor-va">VA: 0x45A80ABC</div>
+                    <div class="monitor-arrow">➔</div>
+                    <div class="monitor-pa" id="p-mon-pa">PA: 0x4000ABC <span style="color:var(--accent-green)">[W=1]</span></div>
+                    <div class="monitor-data" id="p-mon-data">a = 1</div>
+                </div>
+                <div class="monitor-row">
+                    <div class="monitor-label child">Child MMU</div>
+                    <div class="monitor-va">VA: 0x45A80ABC</div>
+                    <div class="monitor-arrow">➔</div>
+                    <div class="monitor-pa" id="c-mon-pa" style="color:var(--text-muted)">Unmapped (Page Fault)</div>
+                    <div class="monitor-data" id="c-mon-data" style="color:var(--text-muted)">--</div>
+                </div>
+            </div>
+
             <svg class="connections" id="svg-layer"></svg>
             
-            <div id="label-l2" class="float-label" style="top: 100px; left: calc(32% + 20px);">shift=30 (L2)</div>
-            <div id="label-l1" class="float-label" style="top: 260px; left: calc(32% + 20px);">shift=21 (L1)</div>
-            <div id="label-l0" class="float-label" style="top: 420px; left: calc(32% + 20px);">shift=12 (L0)</div>
+            <div id="label-l2" class="float-label" style="top: 130px; left: calc(32% + 20px);">shift=30 (L2)</div>
+            <div id="label-l1" class="float-label" style="top: 290px; left: calc(32% + 20px);">shift=21 (L1)</div>
+            <div id="label-l0" class="float-label" style="top: 450px; left: calc(32% + 20px);">shift=12 (L0)</div>
 
             <!-- Parent Process Column -->
             <div class="process-column" id="col-parent">
                 <div class="process-title">Parent (父进程)</div>
                 
                 <div class="page-table visible active-table" id="p-l2">
-                    <div class="table-header"><span>L2 (PGD)</span><span style="color:var(--text-muted)">VA[38:30]</span></div>
+                    <div class="table-header"><span>L2 (PGD)</span><span style="color:var(--text-muted)">VA[38:30]=001</span></div>
                     <div class="table-row">
                         <div class="table-index">511</div>
                         <div class="table-content">
@@ -453,7 +179,7 @@
                 </div>
 
                 <div class="page-table visible" id="p-l1">
-                    <div class="table-header"><span>L1 (PMD)</span><span style="color:var(--text-muted)">VA[29:21]</span></div>
+                    <div class="table-header"><span>L1 (PMD)</span><span style="color:var(--text-muted)">VA[29:21]=045</span></div>
                     <div class="table-row" id="p-l1-u">
                         <div class="table-index">045</div>
                         <div class="table-content">
@@ -464,7 +190,7 @@
                 </div>
 
                 <div class="page-table visible" id="p-l0">
-                    <div class="table-header"><span>L0 (PTE)</span><span style="color:var(--text-muted)">VA[20:12]</span></div>
+                    <div class="table-header"><span>L0 (PTE)</span><span style="color:var(--text-muted)">VA[20:12]=128</span></div>
                     <div class="table-row" id="p-l0-u">
                         <div class="table-index">128</div>
                         <div class="table-content">
@@ -491,7 +217,7 @@
                     <div class="table-row" id="c-l2-u">
                         <div class="table-index">001</div>
                         <div class="table-content">
-                            <div class="pte-raw" id="c-l2-u-raw">Empty</div>
+                            <div class="pte-raw" id="c-l2-u-raw" style="color:#64748b">Empty</div>
                             <div class="pte-flags"><span class="flag v" id="c-l2-u-v">V</span></div>
                         </div>
                     </div>
@@ -502,7 +228,7 @@
                     <div class="table-row" id="c-l1-u">
                         <div class="table-index">045</div>
                         <div class="table-content">
-                            <div class="pte-raw" id="c-l1-u-raw">Empty</div>
+                            <div class="pte-raw" id="c-l1-u-raw" style="color:#64748b">Empty</div>
                             <div class="pte-flags"><span class="flag v" id="c-l1-u-v">V</span></div>
                         </div>
                     </div>
@@ -513,7 +239,7 @@
                     <div class="table-row" id="c-l0-u">
                         <div class="table-index">128</div>
                         <div class="table-content">
-                            <div class="pte-raw" id="c-pte-raw">Empty</div>
+                            <div class="pte-raw" id="c-pte-raw" style="color:#64748b">Empty</div>
                             <div class="pte-flags"><span class="flag v" id="c-flag-v">V</span><span class="flag r" id="c-flag-r">R</span><span class="flag w" id="c-flag-w">W</span><span class="flag cow" id="c-flag-cow">COW</span></div>
                         </div>
                     </div>
@@ -525,7 +251,7 @@
                 <div class="phys-page visible" id="phys-old" style="opacity: 1;">
                     <div class="phys-title">物理内存 (Data)</div>
                     <div class="phys-pfn">PFN: 0x4000</div>
-                    <div class="phys-data" id="data-old">int a = 1;</div>
+                    <div class="phys-data" id="data-old">a = 1</div>
                     <div style="font-size: 0.75rem; margin-top: 0.8rem; color: #cbd5e1; display:flex; justify-content:space-between;">
                         <span>Ref Count:</span><span id="ref-count" style="color:var(--accent-cyan); font-weight:bold;">1</span>
                     </div>
@@ -534,7 +260,7 @@
                 <div class="phys-page" id="phys-new">
                     <div class="phys-title" style="color:var(--accent-green);">新分配物理页</div>
                     <div class="phys-pfn">PFN: 0x5000</div>
-                    <div class="phys-data" id="data-new">int a = 1;</div>
+                    <div class="phys-data" id="data-new">Empty</div>
                     <div style="font-size: 0.75rem; margin-top: 0.8rem; color: #cbd5e1; display:flex; justify-content:space-between;">
                         <span>Ref Count:</span><span style="color:var(--accent-cyan); font-weight:bold;">1</span>
                     </div>
@@ -551,24 +277,19 @@
             
             <div class="panel-body">
                 <div class="explanation" id="step-desc">
-                    父进程正常运行，通过完整的 L2 -> L1 -> L0 三级页表映射到物理数据页 (PFN: 0x4000)。
+                    父进程正常运行，通过完整的 L2 -> L1 -> L0 三级页表映射到物理数据页。
                 </div>
 
                 <div class="code-window">
                     <div class="code-header" id="code-file">// 状态概览</div>
-                    <pre class="code-content" id="code-block"><span class="comment">// 此时无系统调用发生</span>
-MMU_Translate(VA):
-  L2 = satp.PPN
-  L1 = L2[VPN[2]]
-  L0 = L1[VPN[1]]
-  PA = L0[VPN[0]].PFN + VA.offset</pre>
+                    <pre class="code-content" id="code-block"><span class="comment">// 此时无系统调用发生</span></pre>
                 </div>
                 
-                <div class="pte-builder" id="pte-builder" style="display: none;">
-                    <div class="pte-builder-title" id="pte-b-title">构建 PTE</div>
+                <div class="pte-builder" id="pte-builder" style="display: none; opacity: 0;">
+                    <div class="pte-builder-title" id="pte-b-title">寄存器/内存构造</div>
                     <div id="pte-b-desc" style="color:#e2e8f0; margin-bottom: 5px;"></div>
                     <div style="font-family: monospace; display:flex; gap:10px; background:#000; padding:5px; border-radius:4px;">
-                        <span id="pte-b-pfn" style="color:var(--accent-purple)">PFN</span> | 
+                        <span id="pte-b-pfn" style="color:var(--accent-purple)">VAL</span> | 
                         <span id="pte-b-flags" style="color:#94a3b8">FLAGS</span>
                     </div>
                 </div>
@@ -576,7 +297,7 @@ MMU_Translate(VA):
 
             <div class="panel-footer">
                 <button id="btn-prev" disabled>上一步</button>
-                <button class="primary" id="btn-next">下一步解析</button>
+                <button class="primary" id="btn-next">开始执行解析</button>
             </div>
         </div>
     </div>
@@ -584,7 +305,10 @@ MMU_Translate(VA):
     <script>
         const svg = document.getElementById('svg-layer');
         let currentStep = 0;
-        let paths = {}; // Store created paths
+        let paths = {}; 
+        let renderSeq = 0; // Animation interrupt sequence ID
+
+        const delay = ms => new Promise(res => setTimeout(res, ms));
 
         const s = {
             pL2: document.getElementById('p-l2'), pL1: document.getElementById('p-l1'), pL0: document.getElementById('p-l0'),
@@ -592,7 +316,10 @@ MMU_Translate(VA):
             pL2U: document.getElementById('p-l2-u'), pL1U: document.getElementById('p-l1-u'), pL0U: document.getElementById('p-l0-u'),
             cL2U: document.getElementById('c-l2-u'), cL1U: document.getElementById('c-l1-u'), cL0U: document.getElementById('c-l0-u'),
             cL2K: document.getElementById('c-l2-k'),
-            physOld: document.getElementById('phys-old'), physNew: document.getElementById('phys-new')
+            physOld: document.getElementById('phys-old'), physNew: document.getElementById('phys-new'),
+            
+            pMonPa: document.getElementById('p-mon-pa'), pMonData: document.getElementById('p-mon-data'),
+            cMonPa: document.getElementById('c-mon-pa'), cMonData: document.getElementById('c-mon-data')
         };
 
         function drawLine(id, el1, el2, type = 'active') {
@@ -600,196 +327,375 @@ MMU_Translate(VA):
             const r1 = el1.getBoundingClientRect(); const r2 = el2.getBoundingClientRect(); const sR = svg.getBoundingClientRect();
             let x1, y1, x2, y2, d;
 
-            if (r2.top > r1.bottom) { // Vertical down
+            if (r2.top > r1.bottom) { 
                 x1 = r1.left + r1.width/2 - sR.left; y1 = r1.bottom - sR.top;
                 x2 = r2.left + r2.width/2 - sR.left; y2 = r2.top - sR.top;
                 d = `M ${x1} ${y1} C ${x1} ${y1 + 30}, ${x2} ${y2 - 30}, ${x2} ${y2}`;
-            } else if (r1.left > r2.left) { // Right to left
+            } else if (r1.left > r2.left) { 
                 x1 = r1.left - sR.left + 5; y1 = r1.top + r1.height/2 - sR.top;
                 x2 = r2.right - sR.left - 5; y2 = r2.top + r2.height/2 - sR.top;
                 d = `M ${x1} ${y1} C ${x1 - 40} ${y1}, ${x2 + 40} ${y2}, ${x2} ${y2}`;
-            } else { // Left to right
+            } else { 
                 x1 = r1.right - sR.left - 5; y1 = r1.top + r1.height/2 - sR.top;
                 x2 = r2.left - sR.left + 5; y2 = r2.top + r2.height/2 - sR.top;
                 d = `M ${x1} ${y1} C ${x1 + 40} ${y1}, ${x2 - 40} ${y2}, ${x2} ${y2}`;
             }
 
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", d); path.setAttribute("class", `link ${type}`);
+            path.setAttribute("d", d); path.setAttribute("class", `link`);
             svg.appendChild(path);
             paths[id] = path;
+            
+            // Trigger reflow for CSS animation
+            void path.offsetWidth;
+            path.setAttribute("class", `link drawn ${type}`);
+            return path;
+        }
+
+        function setCodeHighlight(lineId) {
+            document.querySelectorAll('.highlight-line').forEach(el => el.classList.remove('executing'));
+            if(lineId) {
+                const el = document.getElementById(lineId);
+                if(el) el.classList.add('executing');
+            }
+        }
+
+        function baseReset() {
+            document.getElementById('col-child').style.opacity = '0.2';
+            s.cL2.classList.remove('visible'); s.cL1.classList.remove('visible'); s.cL0.classList.remove('visible');
+            s.physNew.classList.remove('visible'); s.physNew.classList.remove('new-alloc');
+            document.getElementById('pte-builder').style.display = 'none'; document.getElementById('pte-builder').style.opacity = '0';
+            ['label-l2', 'label-l1', 'label-l0'].forEach(id => document.getElementById(id).classList.remove('visible'));
+            
+            // Clean table rows
+            document.querySelectorAll('.table-row').forEach(el => {
+                el.classList.remove('highlight', 'reading', 'writing', 'cow-target');
+            });
+            
+            // Reset Parent PTE
+            document.getElementById('p-flag-w').className = 'flag w active';
+            document.getElementById('p-flag-cow').className = 'flag cow';
+            document.getElementById('ref-count').innerText = "1";
+            document.getElementById('data-new').innerHTML = "Empty";
+            
+            // Reset Child text
+            document.getElementById('c-l2-addr').innerText = "Unallocated";
+            document.getElementById('c-l1-addr').innerText = "Unallocated";
+            document.getElementById('c-l0-addr').innerText = "Unallocated";
+            ['c-l2-k-raw', 'c-l2-u-raw', 'c-l1-u-raw', 'c-pte-raw'].forEach(id => {
+                document.getElementById(id).innerText = "Empty"; document.getElementById(id).style.color = "#64748b";
+            });
+            ['c-l2-k-v', 'c-l2-u-v', 'c-l1-u-v', 'c-flag-v', 'c-flag-r', 'c-flag-w', 'c-flag-cow'].forEach(id => {
+                document.getElementById(id).className = 'flag ' + id.split('-').pop();
+            });
+            
+            // Reset Monitor
+            s.pMonPa.innerHTML = "PA: 0x4000ABC <span style='color:var(--accent-green)'>[W=1]</span>";
+            s.pMonPa.style.color = "var(--accent-green)";
+            s.pMonData.innerText = "a = 1";
+            s.cMonPa.innerHTML = "Unmapped (Page Fault)";
+            s.cMonPa.style.color = "var(--text-muted)";
+            s.cMonData.innerText = "--"; s.cMonData.style.color = "var(--text-muted)";
+            
+            svg.innerHTML = ''; paths = {};
+            drawLine('p21', s.pL2U, s.pL1U, 'active');
+            drawLine('p10', s.pL1U, s.pL0U, 'active');
+            drawLine('p0p', s.pL0U, s.physOld, 'active');
         }
 
         const stepsData = [
-            { // 0
-                title: "初始状态", desc: "父进程正常运行，通过完整的 L2 -> L1 -> L0 三级页表映射到物理数据页。",
-                file: "// State", code: "// No fork yet.",
-                action: () => {
-                    document.getElementById('col-child').style.opacity = '0.2';
-                    s.cL2.classList.remove('visible'); s.cL1.classList.remove('visible'); s.cL0.classList.remove('visible');
-                    document.getElementById('pte-builder').style.display = 'none';
-                    ['label-l2', 'label-l1', 'label-l0'].forEach(id => document.getElementById(id).classList.remove('visible'));
-                    
-                    s.pL0U.classList.remove('cow-target');
-                    document.getElementById('p-flag-w').className = 'flag w active';
-                    document.getElementById('p-flag-cow').className = 'flag cow';
-                    document.getElementById('ref-count').innerText = "1";
-                    
-                    svg.innerHTML = ''; paths = {};
-                    setTimeout(() => { drawLine('p21', s.pL2U, s.pL1U); drawLine('p10', s.pL1U, s.pL0U); drawLine('p0p', s.pL0U, s.physOld); }, 50);
+            { // 0: INIT
+                title: "初始状态", desc: "父进程正常运行，通过完整的 L2 -> L1 -> L0 三级页表映射到物理数据页。<br><br>注意顶部 <b>Translation Monitor</b> 中 <code>VA 0x45A80ABC</code> 的硬件映射情况。",
+                file: "// State", code: "<span class='comment'>// 此时无系统调用发生</span>",
+                action: async (seq) => {
+                    baseReset();
                 }
             },
-            { // 1
-                title: "do_fork: 创建 L2 并继承内核", desc: "分配子进程的 <code>child_pgdp</code>，并通过 <code>memcpy</code> 直接拷贝 <code>default_pgd</code>。<br><br><b>重点</b>：高地址的内核映射直接复用（图中指向虚无），但低地址的用户态空间（索引001）内容是空的 (0)。",
-                file: "// user.c : __user_create", code: "child_pgdp = mm_alloc(PAGE_SIZE);\n<span class='comment'>// 获取系统默认内核页表</span>\ndefault_pgd = phy_to_virt(get_default_pgd());\n<span class='comment'>// 浅拷贝：继承内核，但用户态部分是 0</span>\n<div class='highlight-line'>memcpy(child_pgdp, default_pgd, PAGE_SIZE);</div>",
-                action: () => {
+            { // 1: do_fork
+                title: "do_fork: 创建 L2 并继承内核", desc: "计算机首先执行 <code>mm_alloc</code> 分配物理页作为 L2 页表。<br>然后通过 <code>memcpy</code> 直接拷贝 <code>default_pgd</code>。<br>内核态高位索引(511)内容被复制，用户态低位索引(001)仍为空。",
+                file: "// user.c : __user_create", 
+                code: "<div id='line1' class='highlight-line'>child_pgdp = mm_alloc(PAGE_SIZE);</div>\ndefault_pgd = phy_to_virt(get_default_pgd());\n<div id='line2' class='highlight-line'>memcpy(child_pgdp, default_pgd, PAGE_SIZE);</div>",
+                action: async (seq) => {
+                    baseReset();
                     document.getElementById('col-child').style.opacity = '1';
-                    s.cL2.classList.add('visible'); s.cL1.classList.remove('visible');
-                    document.getElementById('c-l2-addr').innerText = "@ PFN 0x6000";
-                    document.getElementById('c-l2-k-raw').innerText = "0x20000... (Kernel)"; document.getElementById('c-l2-k-v').classList.add('active');
-                    document.getElementById('c-l2-u-raw').innerText = "Empty (0)"; document.getElementById('c-l2-u-v').classList.remove('active');
-                    s.cL2.classList.add('active-table'); s.pL2.classList.remove('active-table');
                     
-                    drawLine('c2k', s.cL2K, s.pL2U, 'allocating'); // fake connection to kernel
+                    setCodeHighlight('line1');
+                    s.cL2.classList.add('visible'); s.cL2.classList.add('active-table');
+                    document.getElementById('c-l2-addr').innerText = "@ PFN 0x6000";
+                    await delay(800); if(seq !== renderSeq) return;
+                    
+                    setCodeHighlight('line2');
+                    document.getElementById('c-l2-k-raw').innerText = "0x20000... (Kernel)"; 
+                    document.getElementById('c-l2-k-raw').style.color = "#94a3b8";
+                    document.getElementById('c-l2-k-v').classList.add('active');
+                    s.cL2K.classList.add('writing');
+                    drawLine('c2k', s.cL2K, s.pL2U, 'allocating'); 
+                    
+                    await delay(1000); if(seq !== renderSeq) return;
+                    s.cL2K.classList.remove('writing');
                     document.getElementById('label-l2').classList.add('visible');
                 }
             },
-            { // 2
-                title: "copy_page_range: 开启递归拷贝", desc: "调用 <code>copy_page_range</code>，从 <code>shift=30</code> (L2层级) 开始向下遍历父进程的用户态虚拟内存。",
-                file: "// cow.c : copy_page_range", code: "<span class='func'>copy_page_range</span>(..., dst_pgdp, src_pgdp) {\n<div class='highlight-line'>  copy_level(dst_pgdp, src_pgdp, ..., <span class='num'>30</span>, ...);</div>\n}",
-                action: () => {
-                    s.cL2U.classList.add('highlight'); s.pL2U.classList.add('highlight');
+            { // 2: copy_page_range
+                title: "copy_page_range: 启动", desc: "开始处理用户态虚拟内存区间。准备进入 <code>copy_level</code> 循环遍历 L2 页表表项。",
+                file: "// cow.c : copy_page_range", 
+                code: "<span class='func'>copy_page_range</span>(..., dst_pgdp, src_pgdp) {\n<div id='line1' class='highlight-line'>  copy_level(dst_pgdp, src_pgdp, ..., <span class='num'>30</span>, ...);</div>\n}",
+                action: async (seq) => {
+                    if(!s.cL2.classList.contains('visible')) { await stepsData[1].action(seq); } // fast forward prep
+                    if(seq !== renderSeq) return;
+                    
+                    setCodeHighlight('line1');
+                    s.pL2U.classList.add('reading');
+                    await delay(500); if(seq !== renderSeq) return;
+                    s.cL2U.classList.add('reading');
                 }
             },
-            { // 3
-                title: "copy_level (L2 -> L1)", desc: "在 L2 层级，发现子进程的 L2[001] 是空的 (<code>dst_tbl[i] == 0</code>)。<br><br>内核现场分配一个全新物理页作为子进程的 <b>L1 页表</b>，并构造 PTE 写入子 L2。",
-                file: "// cow.c : copy_level (shift=30)", code: "<span class='comment'>// 遍历 src_tbl (父 L2) 发现非空</span>\nif (dst_tbl[i] == 0) {\n<div class='highlight-line'>  pa = alloc_zero_page(0); <span class='comment'>// 分配新 L1</span></div>\n  <span class='comment'>// 构造并写入子 L2 PTE</span>\n<div class='highlight-line'>  dst_tbl[i] = (pa>>12)<<10 | _PAGE_PRESENT;</div>\n}",
-                action: () => {
-                    s.cL1.classList.add('visible');
-                    document.getElementById('c-l1-addr').innerText = "@ PFN 0x7000 (New L1)";
-                    s.cL1.style.borderColor = "var(--accent-green)";
+            { // 3: copy_level (30)
+                title: "copy_level (L2 -> L1)", desc: "1. 读父L2发现有效映射，读子L2发现表项为空。<br>2. <b>分配 L1 页表</b> <code>alloc_zero_page</code>。<br>3. <b>构造并写回</b>：将新 L1 的 PFN 打包成 PTE，写入子 L2。",
+                file: "// cow.c : copy_level (shift=30)", 
+                code: "<span class='comment'>// 发现 dst_tbl[i] == 0</span>\n<div id='line1' class='highlight-line'>pa = alloc_zero_page(0); <span class='comment'>// 分配新 L1</span></div>\n<span class='comment'>// 构造并写入子 L2 PTE</span>\n<div id='line2' class='highlight-line'>dst_tbl[i] = (pa>>12)<<10 | _PAGE_PRESENT;</div>",
+                action: async (seq) => {
+                    if(!s.cL2.classList.contains('visible')) { await stepsData[1].action(seq); }
+                    if(seq !== renderSeq) return;
                     
+                    document.getElementById('label-l2').classList.add('visible');
+                    s.pL2U.classList.add('reading'); s.cL2U.classList.add('reading');
+                    await delay(600); if(seq !== renderSeq) return;
+                    
+                    // Alloc L1
+                    setCodeHighlight('line1');
+                    s.cL2U.classList.remove('reading');
+                    s.cL1.classList.add('visible'); s.cL1.classList.add('active-table');
+                    document.getElementById('c-l1-addr').innerText = "@ PFN 0x7000 (New L1)";
+                    await delay(800); if(seq !== renderSeq) return;
+                    
+                    // Build & Write PTE
+                    setCodeHighlight('line2');
                     const pb = document.getElementById('pte-builder'); pb.style.display = 'block';
-                    document.getElementById('pte-b-title').innerText = "构建子进程 L2 PTE";
-                    document.getElementById('pte-b-desc').innerText = "指向刚分配的新 L1 页表";
+                    setTimeout(()=>pb.style.opacity = '1', 50);
+                    document.getElementById('pte-b-title').innerText = "ALU 计算新 PTE";
+                    document.getElementById('pte-b-desc').innerText = "(0x7000 >> 12) << 10 | _PAGE_PRESENT";
                     document.getElementById('pte-b-pfn').innerText = "PFN: 0x7000"; document.getElementById('pte-b-flags').innerText = "V=1";
                     
-                    s.cL2U.classList.remove('highlight'); s.cL2U.classList.add('writing');
-                    document.getElementById('c-l2-u-raw').innerText = "PFN: 0x7000"; document.getElementById('c-l2-u-v').classList.add('active');
-                    
-                    setTimeout(() => drawLine('c21', s.cL2U, s.cL1), 100);
+                    await delay(800); if(seq !== renderSeq) return;
+                    s.cL2U.classList.add('writing');
+                    document.getElementById('c-l2-u-raw').innerText = "PFN: 0x7000"; document.getElementById('c-l2-u-raw').style.color = "#94a3b8";
+                    document.getElementById('c-l2-u-v').classList.add('active');
+                    drawLine('c21', s.cL2U, s.cL1, 'active');
                 }
             },
-            { // 4
-                title: "copy_level (L1 -> L0)", desc: "递归进入 <code>shift=21</code>。在 L1 层级，同样发现子进程 L1[045] 为空。<br><br>再次分配一个全新物理页作为子进程的 <b>L0 页表</b>，构造 PTE 写入子 L1。",
-                file: "// cow.c : copy_level (shift=21)", code: "<span class='comment'>// 递归深入到 L1 层</span>\nif (dst_tbl[i] == 0) {\n<div class='highlight-line'>  pa = alloc_zero_page(0); <span class='comment'>// 分配新 L0</span></div>\n<div class='highlight-line'>  dst_tbl[i] = (pa>>12)<<10 | _PAGE_PRESENT;</div>\n}",
-                action: () => {
-                    s.cL2U.classList.remove('writing'); s.pL2U.classList.remove('highlight');
-                    s.cL1.style.borderColor = "var(--border-color)"; s.cL2.classList.remove('active-table'); s.cL1.classList.add('active-table');
+            { // 4: copy_level (21)
+                title: "copy_level (L1 -> L0)", desc: "递归进入 <code>shift=21</code>，处理 L1 层。<br>计算机同样发现子 L1 表项为空。<br>执行相同的机器逻辑：分配 L0 物理页 -> 构建 PTE -> 写入内存。",
+                file: "// cow.c : copy_level (shift=21)", 
+                code: "<span class='comment'>// 递归深入到 L1 层</span>\nif (dst_tbl[i] == 0) {\n<div id='line1' class='highlight-line'>  pa = alloc_zero_page(0); <span class='comment'>// 分配新 L0</span></div>\n<div id='line2' class='highlight-line'>  dst_tbl[i] = (pa>>12)<<10 | _PAGE_PRESENT;</div>\n}",
+                action: async (seq) => {
+                    if(!s.cL1.classList.contains('visible')) {
+                        s.cL2.classList.add('visible'); s.cL1.classList.add('visible');
+                        document.getElementById('c-l1-addr').innerText = "@ PFN 0x7000";
+                        document.getElementById('c-l2-u-raw').innerText = "PFN: 0x7000"; document.getElementById('c-l2-u-v').classList.add('active');
+                        drawLine('c21', s.cL2U, s.cL1, 'active');
+                    }
+                    if(seq !== renderSeq) return;
+                    
+                    s.cL2.classList.remove('active-table'); s.cL1.classList.add('active-table');
                     document.getElementById('label-l2').classList.remove('visible'); document.getElementById('label-l1').classList.add('visible');
                     
-                    s.cL1U.classList.add('writing'); s.pL1U.classList.add('highlight');
-                    s.cL0.classList.add('visible'); document.getElementById('c-l0-addr').innerText = "@ PFN 0x8000 (New L0)";
-                    s.cL0.style.borderColor = "var(--accent-green)";
+                    s.pL1U.classList.add('reading'); s.cL1U.classList.add('reading');
+                    await delay(600); if(seq !== renderSeq) return;
                     
-                    document.getElementById('pte-b-title').innerText = "构建子进程 L1 PTE";
-                    document.getElementById('pte-b-desc').innerText = "指向刚分配的新 L0 页表";
+                    setCodeHighlight('line1');
+                    s.cL1U.classList.remove('reading');
+                    s.cL0.classList.add('visible'); s.cL0.classList.add('active-table');
+                    document.getElementById('c-l0-addr').innerText = "@ PFN 0x8000 (New L0)";
+                    await delay(800); if(seq !== renderSeq) return;
+                    
+                    setCodeHighlight('line2');
+                    const pb = document.getElementById('pte-builder'); pb.style.display = 'block'; pb.style.opacity = '1';
+                    document.getElementById('pte-b-title').innerText = "ALU 计算新 PTE";
+                    document.getElementById('pte-b-desc').innerText = "(0x8000 >> 12) << 10 | _PAGE_PRESENT";
                     document.getElementById('pte-b-pfn').innerText = "PFN: 0x8000";
                     
-                    document.getElementById('c-l1-u-raw').innerText = "PFN: 0x8000"; document.getElementById('c-l1-u-v').classList.add('active');
-                    
-                    setTimeout(() => drawLine('c10', s.cL1U, s.cL0), 100);
+                    await delay(800); if(seq !== renderSeq) return;
+                    s.cL1U.classList.add('writing');
+                    document.getElementById('c-l1-u-raw').innerText = "PFN: 0x8000"; document.getElementById('c-l1-u-raw').style.color = "#94a3b8";
+                    document.getElementById('c-l1-u-v').classList.add('active');
+                    drawLine('c10', s.cL1U, s.cL0, 'active');
                 }
             },
-            { // 5
-                title: "copy_level: 到达叶子节点", desc: "递归进入 <code>shift=12</code>，判定当前是最低级页表 (L0)。准备调用 <code>copy_leaf</code> 处理底层的物理数据页映射。",
-                file: "// cow.c : copy_level (shift=12)", code: "if (shift == PAGE_SHIFT) { <span class='comment'>// shift == 12</span>\n<div class='highlight-line'>  copy_leaf(&dst_tbl[i], &src_tbl[i], va);</div>\n}",
-                action: () => {
-                    s.cL1U.classList.remove('writing'); s.pL1U.classList.remove('highlight');
-                    s.cL0.style.borderColor = "var(--border-color)"; s.cL1.classList.remove('active-table'); s.cL0.classList.add('active-table');
-                    s.pL0.classList.add('active-table');
+            { // 5: leaf
+                title: "copy_leaf: 准备级", desc: "递归至 <code>shift=12</code>，命中叶子节点。<br>不再分配页表，调用 <code>copy_leaf</code> 处理底层的物理数据映射。",
+                file: "// cow.c : copy_level (shift=12)", 
+                code: "if (shift == PAGE_SHIFT) { <span class='comment'>// shift == 12</span>\n<div id='line1' class='highlight-line'>  copy_leaf(&dst_tbl[i], &src_tbl[i], va);</div>\n}",
+                action: async (seq) => {
+                    if(!s.cL0.classList.contains('visible')) { await stepsData[4].action(seq); }
+                    if(seq !== renderSeq) return;
+                    
+                    s.cL1.classList.remove('active-table'); s.cL0.classList.add('active-table'); s.pL0.classList.add('active-table');
                     document.getElementById('label-l1').classList.remove('visible'); document.getElementById('label-l0').classList.add('visible');
                     
-                    s.cL0U.classList.add('highlight'); s.pL0U.classList.add('highlight');
-                    document.getElementById('pte-builder').style.display = 'none';
+                    setCodeHighlight('line1');
+                    s.pL0U.classList.add('reading'); s.cL0U.classList.add('reading');
+                    document.getElementById('pte-builder').style.opacity = '0';
                 }
             },
-            { // 6
-                title: "copy_leaf: 读取父 PTE", desc: "<code>copy_leaf</code> 不再分配新页！它直接读取父进程 L0 表项中存放的数据页 PFN。",
-                file: "// cow.c : copy_leaf", code: "<span class='func'>copy_leaf</span>(dst_ptep, src_ptep, va) {\n<div class='highlight-line'>  pte = *src_ptep; <span class='comment'>// 读取父 PTE</span></div>\n  pa = pfn_to_phys(pte_pfn(pte));\n  ...",
-                action: () => {
-                    s.pL0U.classList.remove('highlight'); s.pL0U.classList.add('cow-target');
-                    const pb = document.getElementById('pte-builder'); pb.style.display = 'block';
-                    document.getElementById('pte-b-title').innerText = "提取父进程数据 PFN";
-                    document.getElementById('pte-b-desc').innerText = "直接复用物理页 0x4000";
-                    document.getElementById('pte-b-pfn').innerText = "PFN: 0x4000"; document.getElementById('pte-b-flags').innerText = "V=1, R=1, W=1";
+            { // 6: read parent PTE
+                title: "copy_leaf: Load 父 PTE", desc: "CPU 执行 Load 指令，将父进程的 L0 PTE 内容读取到内部寄存器中，准备进行位运算加工。",
+                file: "// cow.c : copy_leaf", 
+                code: "<span class='func'>copy_leaf</span>(dst_ptep, src_ptep, va) {\n<div id='line1' class='highlight-line'>  pte = *src_ptep; <span class='comment'>// 读取父 PTE 至寄存器</span></div>\n  pa = pfn_to_phys(pte_pfn(pte));\n  ...",
+                action: async (seq) => {
+                    if(!s.pL0.classList.contains('active-table')) { await stepsData[5].action(seq); }
+                    if(seq !== renderSeq) return;
+                    
+                    setCodeHighlight('line1');
+                    s.pL0U.classList.remove('reading'); s.pL0U.classList.add('highlight');
+                    await delay(600); if(seq !== renderSeq) return;
+                    
+                    const pb = document.getElementById('pte-builder'); pb.style.display = 'block'; pb.style.opacity = '1';
+                    document.getElementById('pte-b-title').innerText = "寄存器 (pte)";
+                    document.getElementById('pte-b-desc').innerText = "加载原数据";
+                    document.getElementById('pte-b-pfn').innerText = "PFN: 0x4000"; 
+                    document.getElementById('pte-b-flags').innerHTML = "V=1, R=1, <span style='color:var(--accent-red)'>W=1</span>";
                 }
             },
-            { // 7
-                title: "copy_leaf: 魔改 PTE 权限", desc: "对读出的 PTE 进行位运算魔改：<br>1. <code>pte_wrprotect</code>：强行把 <b>W 位清零</b>。<br>2. <code>pte_mkcow</code>：把软件自定义的 <b>COW 位置 1</b>。",
-                file: "// cow.c : copy_leaf", code: "  <span class='comment'>// 关键魔改：去写权限 + 打 COW 标</span>\n<div class='highlight-line'>  cow = pte_mkcow(pte_wrprotect(pte));</div>\n  <span class='comment'>// cow 的二进制变化: ... W:1->0, COW:0->1</span>",
-                action: () => {
-                    document.getElementById('pte-b-title').innerText = "篡改 PTE 权限位";
+            { // 7: mutate PTE
+                title: "copy_leaf: ALU 位运算", desc: "在 CPU 寄存器内进行位运算加工：<br>1. <code>pte_wrprotect</code>：按位与运算，抹除 <b>W 位</b>。<br>2. <code>pte_mkcow</code>：按位或运算，点亮软件保留的 <b>COW 位</b>。",
+                file: "// cow.c : copy_leaf", 
+                code: "  <span class='comment'>// CPU 内部进行 AND 和 OR 运算修改标志位</span>\n<div id='line1' class='highlight-line'>  cow = pte_mkcow(pte_wrprotect(pte));</div>\n  <span class='comment'>// cow 的二进制变化: ... W:1->0, COW:0->1</span>",
+                action: async (seq) => {
+                    if(document.getElementById('pte-builder').style.opacity === '0') { await stepsData[6].action(seq); }
+                    if(seq !== renderSeq) return;
+                    
+                    setCodeHighlight('line1');
+                    document.getElementById('pte-b-title').innerText = "寄存器 (cow)";
                     document.getElementById('pte-b-desc').innerText = "pte_mkcow(pte_wrprotect(pte))";
-                    document.getElementById('pte-b-flags').innerHTML = "V=1, R=1, <span style='color:var(--accent-red);text-decoration:line-through;'>W=0</span>, <span style='color:var(--accent-yellow)'>COW=1</span>";
+                    
+                    await delay(400); if(seq !== renderSeq) return;
+                    document.getElementById('pte-b-flags').innerHTML = "V=1, R=1, <span style='color:var(--text-muted);text-decoration:line-through;'>W=0</span>";
+                    
+                    await delay(600); if(seq !== renderSeq) return;
+                    document.getElementById('pte-b-flags').innerHTML = "V=1, R=1, <span style='color:var(--text-muted);text-decoration:line-through;'>W=0</span>, <span style='color:var(--accent-yellow)'>COW=1</span>";
                 }
             },
-            { // 8
-                title: "copy_leaf: 布置陷阱并共享", desc: "将修改后的“带毒” PTE 同时写回父进程和子进程的 L0 页表。<br><br>物理页引用计数加一。此时双方共享同一物理页，但都失去了写权限。",
-                file: "// cow.c : copy_leaf", code: "<div class='highlight-line'>  *src_ptep = cow; <span class='comment'>// 父进程失去写权限！</span></div>\n<div class='highlight-line'>  *dst_ptep = cow; <span class='comment'>// 子进程写入</span></div>\n  <span class='func'>get_page</span>(pa);    <span class='comment'>// refcount++</span>\n}",
-                action: () => {
-                    document.getElementById('pte-builder').style.display = 'none';
+            { // 8: write back
+                title: "copy_leaf: Store 回内存", desc: "将寄存器中加工好的“带毒” PTE 写回父子双方的内存。<br><br><b>注意顶部 Monitor</b>：此时子进程 <code>VA</code> 映射建立完毕！父子双方 <code>VA</code> 指向相同的 <code>PA</code>，但都因为 <code>W=0</code> 变成了只读。",
+                file: "// cow.c : copy_leaf", 
+                code: "<div id='line1' class='highlight-line'>  *src_ptep = cow; <span class='comment'>// 剥夺父进程写权限</span></div>\n<div id='line2' class='highlight-line'>  *dst_ptep = cow; <span class='comment'>// 写入子进程</span></div>\n<div id='line3' class='highlight-line'>  <span class='func'>get_page</span>(pa);    <span class='comment'>// 原子操作: refcount++</span></div>\n}",
+                action: async (seq) => {
+                    if(document.getElementById('pte-builder').style.opacity === '0') { await stepsData[7].action(seq); }
+                    if(seq !== renderSeq) return;
+                    document.getElementById('pte-builder').style.opacity = '0';
                     
-                    // Update Parent
-                    const pw = document.getElementById('p-flag-w'); pw.className = 'flag w revoked'; pw.innerText = 'W';
+                    // Write Parent
+                    setCodeHighlight('line1');
+                    s.pL0U.classList.remove('highlight'); s.pL0U.classList.add('cow-target');
+                    const pw = document.getElementById('p-flag-w'); pw.className = 'flag w revoked';
                     const pcow = document.getElementById('p-flag-cow'); pcow.className = 'flag cow active';
+                    if(paths['p0p']) paths['p0p'].setAttribute('class', 'link drawn cow-link');
                     
-                    // Update Child
-                    s.cL0U.classList.remove('highlight'); s.cL0U.classList.add('writing');
-                    document.getElementById('c-pte-raw').innerText = "PFN: 0x4000";
+                    // Update Parent Monitor
+                    s.pMonPa.innerHTML = "PA: 0x4000ABC <span style='color:var(--text-muted)'>[W=0, COW]</span>";
+                    s.pMonPa.style.color = "var(--accent-yellow)";
+                    
+                    await delay(800); if(seq !== renderSeq) return;
+                    
+                    // Write Child
+                    setCodeHighlight('line2');
+                    s.cL0U.classList.remove('reading'); s.cL0U.classList.add('writing');
+                    document.getElementById('c-pte-raw').innerText = "PFN: 0x4000"; document.getElementById('c-pte-raw').style.color = "#94a3b8";
                     document.getElementById('c-flag-v').classList.add('active');
                     document.getElementById('c-flag-r').classList.add('active');
                     const cw = document.getElementById('c-flag-w'); cw.className = 'flag w revoked'; cw.innerText = 'W';
                     const ccow = document.getElementById('c-flag-cow'); ccow.className = 'flag cow active';
+                    drawLine('c0p', s.cL0U, s.physOld, 'cow-link');
                     
-                    document.getElementById('ref-count').innerText = "2";
-                    setTimeout(() => drawLine('c0p', s.cL0U, s.physOld, 'cow-link'), 100);
-                    if(paths['p0p']) paths['p0p'].setAttribute('class', 'link cow-link');
+                    // Update Child Monitor
+                    s.cMonPa.innerHTML = "PA: 0x4000ABC <span style='color:var(--text-muted)'>[W=0, COW]</span>";
+                    s.cMonPa.style.color = "var(--accent-yellow)";
+                    s.cMonData.innerText = "a = 1"; s.cMonData.style.color = "#f8fafc";
+                    
+                    await delay(800); if(seq !== renderSeq) return;
+                    
+                    // Ref count
+                    setCodeHighlight('line3');
+                    const rc = document.getElementById('ref-count');
+                    rc.style.transform = 'scale(1.5)';
+                    rc.innerText = "2";
+                    setTimeout(()=>rc.style.transform = 'scale(1)', 300);
                 }
             },
-            { // 9
-                title: "执行态：Store Page Fault", desc: "子进程在用户态执行 <code>a = 2;</code>。MMU 查表至 L0，硬件检查发现 <b>W=0</b>，当即触发 15 号异常 (Store Page Fault)。",
-                file: "// 硬件 MMU 行为", code: "execute(store_inst, VA):<br>  pte = walk(VA)\n  if (pte.V && !pte.W) {\n<div class='highlight-line'>    raise_exception(EXC_STORE_PAGE_FAULT);</div>\n    stval = VA;\n  }",
-                action: () => {
+            { // 9: Fault
+                title: "执行态：Store Page Fault", desc: "子进程在 U-Mode 尝试执行 Store 指令 <code>a = 2;</code>。<br>MMU 查表至 L0 后，检查权限发现 <b>W=0</b>，硬件异常触发逻辑立即抛出 <code>15号异常</code>。<br>注意 Monitor 中子进程尝试修改数据失败！",
+                file: "// 硬件 MMU 电路逻辑", 
+                code: "execute(store_inst, VA):<br>  pte = walk(VA)\n  if (pte.V && !pte.W) {\n<div id='line1' class='highlight-line'>    raise_exception(EXC_STORE_PAGE_FAULT);</div>\n    stval = VA;\n  }",
+                action: async (seq) => {
+                    if(!paths['c0p']) { await stepsData[8].action(seq); }
+                    if(seq !== renderSeq) return;
+                    
                     s.cL0U.classList.remove('writing'); s.cL0U.classList.add('cow-target');
-                    s.cL0.classList.add('active-table'); s.pL0.classList.remove('active-table'); s.pL0U.classList.remove('cow-target');
+                    s.pL0.classList.remove('active-table'); s.pL0U.classList.remove('cow-target');
                     
-                    if(paths['c0p']) {
-                        paths['c0p'].setAttribute('class', 'link fault');
-                    }
+                    setCodeHighlight('line1');
+                    await delay(400); if(seq !== renderSeq) return;
+                    
+                    if(paths['c0p']) { paths['c0p'].setAttribute('class', 'link drawn fault'); }
+                    
+                    // Flash monitor data red
+                    s.cMonData.innerText = "a = 2 ??";
+                    s.cMonData.style.background = "rgba(239, 68, 68, 0.4)";
                 }
             },
-            { // 10
-                title: "cow_handle_write: 彻底分裂", desc: "异常处理例程发现 <code>COW=1</code> 且引用计数为 2。分配全新物理页，完整拷贝 4KB 数据。<br><br>将子进程 PTE 指向新物理页，<b>恢复 W=1</b> 并清空 COW。TLB 刷新后，子进程重新执行 Store，成功写入新物理页！",
-                file: "// cow.c : cow_handle_write", code: "if (page_count(old_pa) >= 2) {\n<div class='highlight-line'>  new_va = mm_alloc(PAGE_SIZE);</div>\n  memcpy(new_va, old_pa, PAGE_SIZE);\n  <span class='comment'>// 改 PFN，并 pte_uncow_mkwrite 恢复权限</span>\n  newpte = (pte & ~MASK) | new_pa;\n<div class='highlight-line'>  set_pte(ptep, pte_uncow_mkwrite(newpte));</div>\n  put_page(old_pa); <span class='comment'>// 原页 ref--</span>\n}",
-                action: () => {
-                    s.physNew.classList.add('visible'); s.physNew.classList.add('new');
-                    if(paths['c0p']) paths['c0p'].remove();
+            { // 10: Handle
+                title: "cow_handle_write: 彻底分裂", desc: "捕获异常。<br>1. <code>mm_alloc</code> 分配新物理页，<code>memcpy</code> 拷贝旧数据。<br>2. 修改子 PTE 指向新页，<b>恢复 W=1</b>。<br><br><b>观察 Monitor</b>：子进程的 <code>VA</code> 已经重定向到了专属的 <code>PA 0x5000ABC</code> 并且具备可写权限，写入成功！",
+                file: "// cow.c : cow_handle_write", 
+                code: "if (page_count(old_pa) >= 2) {\n<div id='line1' class='highlight-line'>  new_va = mm_alloc(PAGE_SIZE);</div>\n<div id='line2' class='highlight-line'>  memcpy(new_va, old_pa, PAGE_SIZE);</div>\n  <span class='comment'>// 改 PFN，位运算恢复 W=1 清空 COW</span>\n  newpte = (pte & ~MASK) | new_pa;\n<div id='line3' class='highlight-line'>  set_pte(ptep, pte_uncow_mkwrite(newpte));</div>\n  put_page(old_pa); <span class='comment'>// 原页 ref--</span>\n}",
+                action: async (seq) => {
+                    if(!paths['c0p'] || paths['c0p'].getAttribute('class').indexOf('fault')===-1) { await stepsData[9].action(seq); }
+                    if(seq !== renderSeq) return;
                     
+                    // Alloc new page
+                    setCodeHighlight('line1');
+                    s.physNew.classList.add('visible'); s.physNew.classList.add('new-alloc');
+                    if(paths['c0p']) paths['c0p'].remove();
+                    s.cMonData.innerText = "a = 1"; s.cMonData.style.background = "rgba(0,0,0,0.5)"; // reset fail attempt
+                    await delay(800); if(seq !== renderSeq) return;
+                    
+                    // Memcpy effect
+                    setCodeHighlight('line2');
+                    const effect = document.createElement('div'); effect.className = 'copy-effect';
+                    document.getElementById('data-new').appendChild(effect);
+                    await delay(500); if(seq !== renderSeq) return;
+                    document.getElementById('data-new').innerHTML = "a = 1 <span style='color:var(--text-muted)'>(Copied)</span>";
+                    await delay(600); if(seq !== renderSeq) return;
+                    
+                    // Set PTE
+                    setCodeHighlight('line3');
+                    s.cL0U.classList.remove('cow-target'); s.cL0U.classList.add('writing');
+                    document.getElementById('c-pte-raw').innerText = "PFN: 0x5000";
                     const cw = document.getElementById('c-flag-w'); cw.className = 'flag w active';
                     const ccow = document.getElementById('c-flag-cow'); ccow.className = 'flag cow';
-                    document.getElementById('c-pte-raw').innerText = "PFN: 0x5000";
-                    s.cL0U.classList.remove('cow-target'); s.cL0U.classList.add('writing');
                     
-                    document.getElementById('data-new').innerHTML = "<span style='color:var(--accent-red)'>int a = 2;</span>";
-                    document.getElementById('ref-count').innerText = "1";
+                    drawLine('c0pNew', s.cL0U, s.physNew, 'allocating');
                     
-                    setTimeout(() => drawLine('c0pNew', s.cL0U, s.physNew, 'allocating'), 100);
+                    // Monitor child VA redirect
+                    s.cMonPa.innerHTML = "PA: 0x5000ABC <span style='color:var(--accent-green)'>[W=1]</span>";
+                    s.cMonPa.style.color = "var(--accent-green)";
+                    
+                    // Ref count
+                    const rc = document.getElementById('ref-count');
+                    rc.style.transform = 'scale(0.5)'; rc.innerText = "1";
+                    setTimeout(()=>rc.style.transform = 'scale(1)', 300);
+                    
+                    await delay(1000); if(seq !== renderSeq) return;
+                    document.getElementById('data-new').innerHTML = "<span style='color:var(--accent-red)'>a = 2</span> <span style='color:var(--text-muted)'>(Stored)</span>";
+                    s.cMonData.innerText = "a = 2"; s.cMonData.style.background = "rgba(16, 185, 129, 0.3)";
+                    
+                    if(paths['c0pNew']) paths['c0pNew'].setAttribute('class', 'link drawn active');
                 }
             }
         ];
 
-        function updateUI() {
+        async function updateUI() {
+            renderSeq++; const seq = renderSeq;
             const step = stepsData[currentStep];
             document.getElementById('step-ind').innerText = `STEP ${currentStep} / ${stepsData.length - 1}`;
             document.getElementById('step-title').innerHTML = step.title;
@@ -798,14 +704,16 @@ MMU_Translate(VA):
             document.getElementById('code-block').innerHTML = step.code;
 
             document.getElementById('btn-prev').disabled = currentStep === 0;
-            document.getElementById('btn-next').disabled = currentStep === stepsData.length - 1;
+            const btnNext = document.getElementById('btn-next');
+            btnNext.disabled = currentStep === stepsData.length - 1;
+            btnNext.innerText = currentStep === 0 ? "开始执行解析" : (currentStep === stepsData.length - 1 ? "推演结束" : "下一步");
 
-            step.action();
+            await step.action(seq);
         }
 
         document.getElementById('btn-next').addEventListener('click', () => { if (currentStep < stepsData.length - 1) { currentStep++; updateUI(); } });
         document.getElementById('btn-prev').addEventListener('click', () => { if (currentStep > 0) { currentStep--; updateUI(); } });
-        window.addEventListener('resize', () => { stepsData[currentStep].action(); });
+        window.addEventListener('resize', () => { stepsData[currentStep].action(renderSeq); });
         
         updateUI();
     </script>
