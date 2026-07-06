@@ -385,7 +385,7 @@ int do_fork(struct user *parent)
 	struct user *child;
 	struct user_memory_region *region;	// 用户内存区域
 	void *child_pgdp;	// 子任务页表基地址
-	void *default_pgd = (void *)phy_to_virt(get_default_pgd());// 内核默认页表基地址
+	void *default_pgdp = (void *)phy_to_virt(get_default_pgd());// 内核默认页表基地址
 
 	child = user_create_force();	// 创建子任务
 	if (!child) {
@@ -397,7 +397,7 @@ int do_fork(struct user *parent)
 	if (!child_pgdp) {
 		return -1;
 	}
-	memcpy((char *)child_pgdp, (char *)default_pgd, PAGE_SIZE);
+	memcpy((char *)child_pgdp, (char *)default_pgdp, PAGE_SIZE);
 
 	/*
 	 * memcpy 继承了内核 PGD 的低地址映射(含内核代码 0x80200000 与用户区,
