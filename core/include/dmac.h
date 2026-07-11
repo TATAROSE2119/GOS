@@ -22,6 +22,9 @@
 
 enum {
 	DMAC_XFER_M2M = 0,
+	DMAC_XFER_M2D,
+	DMAC_XFER_D2M,
+	DMAC_XFER_D2D,
 };
 
 struct dmac_ops {

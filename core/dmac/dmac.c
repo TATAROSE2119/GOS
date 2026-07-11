@@ -24,6 +24,7 @@
 #include "irq.h"
 #include "dmac.h"
 #include "dma-mapping.h"
+#include "cache_flush.h"
 
 static LIST_HEAD(dmacs);
 static unsigned long dmac_idx_bitmap = 0;
@@ -83,7 +84,7 @@ int register_dmac_device(struct dmac_device *dmac)
 {
 	int index;
 
-	index = find_free_dmac_index();
+	index = find_free_dmac_index(); // find a free dmac index
 	sprintf(dmac->name, "DMAC%d", index);
 
 	list_add_tail(&dmac->list, &dmacs);
@@ -96,8 +97,16 @@ int dma_transfer(struct dmac_device *dmac, char *dst, char *src,
 {
 	unsigned long src_iova;
 	unsigned long dst_iova;
+	int ret;
 
-	if (dmac->dev->iommu) {//if iommu is enabled, use dma mapping
+	if (!dmac || !dmac->ops || !dmac->dev) {
+		return -1;
+	}
+	if (!size) {
+		return 0;
+	}
+
+	if (dmac->dev->iommu) { // if iommu is enabled, use dma mapping
 		if ((((unsigned long)dst) % PAGE_SIZE) ||
 		    (((unsigned long)src) % PAGE_SIZE)) {
 			print("dma_transfer: Only support PAGE_SIZE algin "
@@ -106,20 +115,26 @@ int dma_transfer(struct dmac_device *dmac, char *dst, char *src,
 		}
 	}
 
-	if (!dmac || !dmac->ops || !dmac->dev)	//check dmac device
-		return -1;
-
-	if (dma_mapping(dmac->dev, virt_to_phy(src), &src_iova, size, NULL))
-		return -1;
-
-	if (dma_mapping(dmac->dev, virt_to_phy(dst), &dst_iova, size, NULL))
-		return -1;
-
 	if (dir == DMAC_XFER_M2M) {
-		if (!dmac->ops->transfer_m2m)
+		if (!dmac->ops->transfer_m2m) {
 			return -1;
-		return dmac->ops->transfer_m2m(src_iova, dst_iova, size,
-					       dmac->priv);
+		}
+		dcache_clean_range((unsigned long)src, size);
+		dcache_flush_range((unsigned long)dst, size);
+		dcache_inval_range((unsigned long)dst, size);
+
+		if (dma_mapping(dmac->dev, virt_to_phy(src), &src_iova, size,
+				NULL))
+			return -1;
+
+		if (dma_mapping(dmac->dev, virt_to_phy(dst), &dst_iova, size,
+				NULL))
+			return -1;
+
+		ret = dmac->ops->transfer_m2m(src_iova, dst_iova, size,
+					      dmac->priv);
+		// dcache_inval_range((unsigned long)dst, size);
+		return ret;
 	}
 
 	return -1;
