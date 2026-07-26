@@ -664,13 +664,13 @@ int do_page_fault(unsigned long addr, unsigned long cause, int from_user)
 	/* COW 写保护缺页：必须在下面 VMAP 检查之前（用户页是低地址、PTE
 	 * 还有效） */
 	if (cause == EXC_STORE_PAGE_FAULT) {
-		unsigned long *pgdp = (unsigned long *)get_current_pgd();
+		unsigned long *pgdp = (unsigned long *)get_current_pgd();	// 当前任务的页表
 		unsigned long *ptep =
-		    mmu_pt_walk_fetch(pgdp, addr, PGDIR_SHIFT, 1);
+		    mmu_pt_walk_fetch(pgdp, addr, PGDIR_SHIFT, 1);	// 获取当前任务页表中对应虚拟地址的页表项
 
 		if (ptep && pte_is_valid(*ptep) && pte_is_cow(*ptep) &&
 		    !(*ptep & _PAGE_WRITE))
-			return cow_handle_write(addr, ptep);
+			return cow_handle_write(addr, ptep);	// 处理 COW 写保护缺页
 	}
 #endif // CONFIG_COW
 	print("Page Fault -- fault addr:0x%lx\n", addr);

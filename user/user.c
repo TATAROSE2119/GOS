@@ -414,7 +414,7 @@ int do_fork(struct user *parent)
 			return -1;
 		}
 		add_user_space_memory(child, region->start,
-				      region->end - region->start);
+				      region->end - region->start);	// 添加子任务的用户区内存区域
 	}
 	// clone U态上下文加元数据
 	child->cpu_context = parent->cpu_context; // 整包寄存器/CSR

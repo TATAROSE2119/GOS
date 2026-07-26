@@ -177,21 +177,21 @@ struct user_run_params {
 };
 
 struct user {
-	struct list_head list;
-	int user_id;
-	struct user_mode_cpu_context cpu_context;
-	unsigned long user_code_va;
-	unsigned long user_code_pa;
-	unsigned long user_code_user_va;
-	unsigned long user_share_memory_va;
-	unsigned long user_share_memory_pa;
-	unsigned long user_share_memory_user_va;
-	spinlock_t lock;
-	struct list_head memory_region;
-	int mapping;
-	struct user_run_params *run_params;
-	struct user_run_params s_run_params;
-	void *pgdp;
+	struct list_head list;	// 链表节点，挂在 per_cpu(user_list, cpu) 上
+	int user_id;			// 用户 ID，唯一标识一个用户任务
+	struct user_mode_cpu_context cpu_context;	// 用户态上下文，包含寄存器、浮点寄存器、向量寄存器等
+	unsigned long user_code_va;// 用户代码虚拟地址
+	unsigned long user_code_pa;// 用户代码物理地址
+	unsigned long user_code_user_va;// 用户代码在用户态的虚拟地址
+	unsigned long user_share_memory_va;// 用户共享内存虚拟地址
+	unsigned long user_share_memory_pa;// 用户共享内存物理地址
+	unsigned long user_share_memory_user_va;// 用户共享内存在用户态的虚拟地址
+	spinlock_t lock;// 用户任务锁，保护用户任务的状态和资源
+	struct list_head memory_region;// 用户内存区域链表，记录用户任务的内存映射区域
+	int mapping;// 标记用户任务是否已经映射内存，1 表示已映射，0 表示未映射
+	struct user_run_params *run_params;// 用户运行参数，包含命令行参数、用户 ID、CPU ID 等
+	struct user_run_params s_run_params;// 用户运行参数的副本，用于在用户态和内核态之间传递参数
+	void *pgdp;// 用户页表基地址，指向用户任务的页全局目录
 };
 
 struct user *user_create(void);

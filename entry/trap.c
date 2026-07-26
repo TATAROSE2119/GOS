@@ -208,14 +208,14 @@ static int handle_exception(struct pt_regs *regs, unsigned long cause)
 
 int do_exception(struct pt_regs *regs, unsigned long scause)
 {
-	if (scause & (1UL << 63)) {
+	if (scause & (1UL << 63)) {	// interrupt
 		task_scheduler_enter(regs);
 		handle_irq(scause);
 		task_scheduler_exit(regs);
-	} else {
-		if (scause == EXC_BREAKPOINT) {
+	} else {	//	 exception
+		if (scause == EXC_BREAKPOINT) {	// breakpoint 意味着 gos_stub_do_process() 返回 0，表示 gos_stub 已经处理了该异常
 			do_breakpoint(regs);
-		} else if (handle_exception(regs, scause)) {
+		} else if (handle_exception(regs, scause)) {//	 handle_exception 返回非 0，表示异常未被处理
 			try_to_kill_task(regs);
 		}
 	}
